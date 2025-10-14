@@ -14,7 +14,6 @@ import {PRODUCT_CARD_FRAGMENT} from '~/data/fragments';
 import {getImageLoadingPriority} from '~/lib/const';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
-import {getMockProducts} from '~/lib/mockData.server';
 
 const PAGE_BY = 8;
 
@@ -61,6 +60,7 @@ export async function loader({request, context: {storefront}}) {
     });
   } catch (e) {
     console.error('Failed to load All Products', e);
+    const {getMockProducts} = await import('~/lib/mockData.server');
     const emptyConnection = getMockProducts(12);
     const seo = seoPayload.collection({
       url: request.url,

@@ -14,7 +14,6 @@ import {Button} from '~/components/Button';
 import {getImageLoadingPriority} from '~/lib/const';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
-import {getMockCollections} from '~/lib/mockData.server';
 
 const PAGINATION_SIZE = 4;
 
@@ -42,6 +41,7 @@ export const loader = async ({request, context: {storefront}}) => {
     return json({collections, seo});
   } catch (e) {
     console.error('Failed to load Collections index', e);
+    const {getMockCollections} = await import('~/lib/mockData.server');
     const emptyConnection = getMockCollections(4);
     const seo = seoPayload.listCollections({
       collections: emptyConnection,

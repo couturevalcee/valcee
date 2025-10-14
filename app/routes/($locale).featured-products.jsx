@@ -5,7 +5,6 @@ import {
   PRODUCT_CARD_FRAGMENT,
   FEATURED_COLLECTION_FRAGMENT,
 } from '~/data/fragments';
-import {getMockFeatured} from '~/lib/mockData.server';
 
 /**
  * @param {LoaderFunctionArgs}
@@ -36,7 +35,7 @@ export async function getFeaturedData(storefront, variables = {}) {
   }
 }
 
-export const FEATURED_ITEMS_QUERY = `#graphql
+const FEATURED_ITEMS_QUERY = `#graphql
   query FeaturedItems(
     $country: CountryCode
     $language: LanguageCode
@@ -58,7 +57,60 @@ export const FEATURED_ITEMS_QUERY = `#graphql
   ${FEATURED_COLLECTION_FRAGMENT}
 `;
 
-/** @typedef {Class<getFeaturedData>>>} FeaturedData */
+function getMockFeatured() {
+  return {
+    featuredCollections: getMockCollections(3),
+    featuredProducts: getMockProducts(8),
+  };
+}
+
+function getMockProducts(count = 8) {
+  const cats = ['occasional', 'active', 'casual', 'lounge'];
+  const nodes = Array.from({length: count}).map((_, i) => {
+    const cat = cats[i % cats.length];
+    const handle = `${cat}-${i + 1}`;
+    const title = `${toTitle(cat)} ${i + 1}`;
+    return {
+      id: `mock-prod-${handle}`,
+      title,
+      handle,
+      vendor: 'Valcee Couture',
+      publishedAt: new Date().toISOString(),
+      variants: {
+        nodes: [
+          {
+            id: `mock-variant-${handle}`,
+            availableForSale: false,
+            image: null,
+            price: {amount: '0.00', currencyCode: 'USD'},
+            compareAtPrice: null,
+            selectedOptions: [],
+            product: {handle, title},
+          },
+        ],
+      },
+      __placeholder: true,
+    };
+  });
+  return {nodes};
+}
+
+function getMockCollections(count = 3) {
+  const cats = ['occasional', 'active', 'casual', 'lounge'];
+  const nodes = cats.slice(0, count).map((h) => ({
+    id: `mock-col-${h}`,
+    title: toTitle(h),
+    handle: h,
+    description: '',
+    seo: {title: toTitle(h), description: ''},
+    image: null,
+  }));
+  return {nodes};
+}
+
+function toTitle(slug) {
+  return slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
 /** @typedef {import('@shopify/remix-oxygen').SerializeFrom<typeof loader>} LoaderReturnData */
