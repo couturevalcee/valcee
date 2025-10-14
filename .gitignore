@@ -7,3 +7,21 @@ node_modules
 .env
 .shopify
 .react-router
+
+# OS/editor junk
+.DS_Store
+.vscode/
+.idea/
+
+# Local env variants
+.env.local
+
+# Dev servers/build tools
+.vite/
+.vercel/
+.netlify/
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*

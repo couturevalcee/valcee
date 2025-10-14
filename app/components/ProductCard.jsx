@@ -15,6 +15,7 @@ import {getProductPlaceholder} from '~/lib/placeholders';
  *   loading?: HTMLImageElement['loading'];
  *   onClick?: () => void;
  *   quickAdd?: boolean;
+ *   placeholderSrc?: string;
  * }}
  */
 export function ProductCard({
@@ -24,6 +25,7 @@ export function ProductCard({
   loading,
   onClick,
   quickAdd,
+  placeholderSrc,
 }) {
   let cardLabel;
 
@@ -45,52 +47,115 @@ export function ProductCard({
 
   return (
     <div className="flex flex-col gap-2">
-      <Link
-        onClick={onClick}
-        to={`/products/${product.handle}`}
-        prefetch="viewport"
-      >
-        <div className={clsx('grid gap-4', className)}>
-          <div className="card-image aspect-[4/5] bg-primary/5">
-            {image && (
-              <Image
-                className="object-cover w-full fadeIn"
-                sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
-                aspectRatio="4/5"
-                data={image}
-                alt={image.altText || `Picture of ${product.title}`}
-                loading={loading}
-              />
-            )}
-            <Text
-              as="label"
-              size="fine"
-              className="absolute top-0 right-0 m-4 text-right text-notice"
-            >
-              {cardLabel}
-            </Text>
-          </div>
-          <div className="grid gap-1">
-            <Text
-              className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
-              as="h3"
-            >
-              {product.title}
-            </Text>
-            <div className="flex gap-4">
-              <Text className="flex gap-4">
-                <Money withoutTrailingZeros data={price} />
-                {isDiscounted(price, compareAtPrice) && (
-                  <CompareAtPrice
-                    className={'opacity-50'}
-                    data={compareAtPrice}
+      {product.__placeholder ? (
+        <div>
+          <div className={clsx('grid gap-4', className)}>
+            <div className="card-image aspect-[4/5] bg-primary/5">
+              {image ? (
+                <Image
+                  className="object-contain w-full fadeIn img-cutout opacity-95"
+                  sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
+                  aspectRatio="4/5"
+                  data={image}
+                  alt={image.altText || `Picture of ${product.title}`}
+                  loading={loading}
+                />
+              ) : (
+                placeholderSrc && (
+                  <img
+                    className="object-contain w-full h-full fadeIn img-cutout opacity-95"
+                    src={placeholderSrc}
+                    alt={product.title}
+                    loading={loading}
                   />
-                )}
+                )
+              )}
+              <Text
+                as="label"
+                size="fine"
+                className="absolute top-0 right-0 m-4 text-right text-notice"
+              >
+                {cardLabel}
               </Text>
+            </div>
+            <div className="grid gap-1">
+              <Text
+                className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
+                as="h3"
+              >
+                {product.title}
+              </Text>
+              <div className="flex gap-4">
+                <Text className="flex gap-4">
+                  <Money withoutTrailingZeros data={price} />
+                  {isDiscounted(price, compareAtPrice) && (
+                    <CompareAtPrice
+                      className={'opacity-50'}
+                      data={compareAtPrice}
+                    />
+                  )}
+                </Text>
+              </div>
             </div>
           </div>
         </div>
-      </Link>
+      ) : (
+        <Link
+          onClick={onClick}
+          to={`/products/${product.handle}`}
+          prefetch="viewport"
+        >
+          <div className={clsx('grid gap-4', className)}>
+            <div className="card-image aspect-[4/5] bg-primary/5">
+              {image ? (
+                <Image
+                  className="object-contain w-full fadeIn img-cutout opacity-95"
+                  sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
+                  aspectRatio="4/5"
+                  data={image}
+                  alt={image.altText || `Picture of ${product.title}`}
+                  loading={loading}
+                />
+              ) : (
+                placeholderSrc && (
+                  <img
+                    className="object-contain w-full h-full fadeIn img-cutout opacity-95"
+                    src={placeholderSrc}
+                    alt={product.title}
+                    loading={loading}
+                  />
+                )
+              )}
+              <Text
+                as="label"
+                size="fine"
+                className="absolute top-0 right-0 m-4 text-right text-notice"
+              >
+                {cardLabel}
+              </Text>
+            </div>
+            <div className="grid gap-1">
+              <Text
+                className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
+                as="h3"
+              >
+                {product.title}
+              </Text>
+              <div className="flex gap-4">
+                <Text className="flex gap-4">
+                  <Money withoutTrailingZeros data={price} />
+                  {isDiscounted(price, compareAtPrice) && (
+                    <CompareAtPrice
+                      className={'opacity-50'}
+                      data={compareAtPrice}
+                    />
+                  )}
+                </Text>
+              </div>
+            </div>
+          </div>
+        </Link>
+      )}
       {quickAdd && firstVariant.availableForSale && (
         <AddToCartButton
           lines={[

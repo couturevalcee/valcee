@@ -99,13 +99,21 @@ async function loadCriticalData({request, context}) {
 
   const {storefront, env} = context;
 
+  let shopAnalytics;
+  try {
+    shopAnalytics = getShopAnalytics({
+      storefront,
+      publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
+    });
+  } catch (e) {
+    console.error('Failed to get shop analytics', e);
+    shopAnalytics = undefined;
+  }
+
   return {
     layout,
     seo,
-    shop: getShopAnalytics({
-      storefront,
-      publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
-    }),
+    shop: shopAnalytics,
     consent: {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
@@ -134,7 +142,8 @@ function loadDeferredData({context}) {
  * @param {Class<loader>>}
  */
 export const meta = ({data}) => {
-  return getSeoMeta(data.seo);
+  const fallback = {title: 'Valcee Couture', description: 'Valcee Couture'};
+  return getSeoMeta(data?.seo ?? fallback);
 };
 
 /**
@@ -171,7 +180,7 @@ function Layout({children}) {
             </PageLayout>
           </Analytics.Provider>
         ) : (
-          children
+          <PageLayout layout={undefined}>{children}</PageLayout>
         )}
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
@@ -282,45 +291,56 @@ const LAYOUT_QUERY = `#graphql
  * @param {AppLoadContext}
  */
 async function getLayoutData({storefront, env}) {
-  const data = await storefront.query(LAYOUT_QUERY, {
-    variables: {
-      headerMenuHandle: 'main-menu',
-      footerMenuHandle: 'footer',
-      language: storefront.i18n.language,
-    },
-  });
+  try {
+    const data = await storefront.query(LAYOUT_QUERY, {
+      variables: {
+        headerMenuHandle: 'main-menu',
+        footerMenuHandle: 'footer',
+        language: storefront.i18n.language,
+      },
+    });
 
-  invariant(data, 'No data returned from Shopify API');
+    /*
+        Modify specific links/routes (optional)
+        @see: https://shopify.dev/api/storefront/unstable/enums/MenuItemType
+        e.g here we map:
+          - /blogs/news -> /news
+          - /blog/news/blog-post -> /news/blog-post
+          - /collections/all -> /products
+      */
+    const customPrefixes = {BLOG: '', CATALOG: 'products'};
 
-  /*
-      Modify specific links/routes (optional)
-      @see: https://shopify.dev/api/storefront/unstable/enums/MenuItemType
-      e.g here we map:
-        - /blogs/news -> /news
-        - /blog/news/blog-post -> /news/blog-post
-        - /collections/all -> /products
-    */
-  const customPrefixes = {BLOG: '', CATALOG: 'products'};
+    const headerMenu = data?.headerMenu
+      ? parseMenu(
+          data.headerMenu,
+          data.shop.primaryDomain.url,
+          env,
+          customPrefixes,
+        )
+      : undefined;
 
-  const headerMenu = data?.headerMenu
-    ? parseMenu(
-        data.headerMenu,
-        data.shop.primaryDomain.url,
-        env,
-        customPrefixes,
-      )
-    : undefined;
+    const footerMenu = data?.footerMenu
+      ? parseMenu(
+          data.footerMenu,
+          data.shop.primaryDomain.url,
+          env,
+          customPrefixes,
+        )
+      : undefined;
 
-  const footerMenu = data?.footerMenu
-    ? parseMenu(
-        data.footerMenu,
-        data.shop.primaryDomain.url,
-        env,
-        customPrefixes,
-      )
-    : undefined;
-
-  return {shop: data.shop, headerMenu, footerMenu};
+    return {shop: data.shop, headerMenu, footerMenu};
+  } catch (e) {
+    console.error('Failed to load layout data from Shopify', e);
+    // Minimal fallback so the app can render during development when API fails
+    const fallbackShop = {
+      id: 'fallback-shop',
+      name: 'Valcee Couture',
+      description: '',
+      primaryDomain: {url: 'https://valcee-couture.myshopify.com'},
+      brand: {logo: null},
+    };
+    return {shop: fallbackShop, headerMenu: undefined, footerMenu: undefined};
+  }
 }
 
 /** @typedef {LoaderReturnData} RootLoader */

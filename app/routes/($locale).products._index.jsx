@@ -14,6 +14,7 @@ import {PRODUCT_CARD_FRAGMENT} from '~/data/fragments';
 import {getImageLoadingPriority} from '~/lib/const';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
+import {getMockProducts} from '~/lib/mockData.server';
 
 const PAGE_BY = 8;
 
@@ -25,38 +26,58 @@ export const headers = routeHeaders;
 export async function loader({request, context: {storefront}}) {
   const variables = getPaginationVariables(request, {pageBy: PAGE_BY});
 
-  const data = await storefront.query(ALL_PRODUCTS_QUERY, {
-    variables: {
-      ...variables,
-      country: storefront.i18n.country,
-      language: storefront.i18n.language,
-    },
-  });
-
-  invariant(data, 'No data returned from Shopify API');
-
-  const seo = seoPayload.collection({
-    url: request.url,
-    collection: {
-      id: 'all-products',
-      title: 'All Products',
-      handle: 'products',
-      descriptionHtml: 'All the store products',
-      description: 'All the store products',
-      seo: {
-        title: 'All Products',
-        description: 'All the store products',
+  try {
+    const data = await storefront.query(ALL_PRODUCTS_QUERY, {
+      variables: {
+        ...variables,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
       },
-      metafields: [],
-      products: data.products,
-      updatedAt: '',
-    },
-  });
+    });
 
-  return json({
-    products: data.products,
-    seo,
-  });
+    invariant(data, 'No data returned from Shopify API');
+
+    const seo = seoPayload.collection({
+      url: request.url,
+      collection: {
+        id: 'all-products',
+        title: 'All Products',
+        handle: 'products',
+        descriptionHtml: 'All the store products',
+        description: 'All the store products',
+        seo: {
+          title: 'All Products',
+          description: 'All the store products',
+        },
+        metafields: [],
+        products: data.products,
+        updatedAt: '',
+      },
+    });
+
+    return json({
+      products: data.products,
+      seo,
+    });
+  } catch (e) {
+    console.error('Failed to load All Products', e);
+    const emptyConnection = getMockProducts(12);
+    const seo = seoPayload.collection({
+      url: request.url,
+      collection: {
+        id: 'all-products',
+        title: 'All Products',
+        handle: 'products',
+        descriptionHtml: 'All the store products',
+        description: 'All the store products',
+        seo: {title: 'All Products', description: 'All the store products'},
+        metafields: [],
+        products: emptyConnection,
+        updatedAt: '',
+      },
+    });
+    return json({products: emptyConnection, seo});
+  }
 }
 
 /**
@@ -81,6 +102,8 @@ export default function AllProducts() {
                 key={product.id}
                 product={product}
                 loading={getImageLoadingPriority(i)}
+                placeholderSrc={`/images/collections/${(product.handle || 'casual')}.png`}
+                className="group"
               />
             ));
 
@@ -91,7 +114,9 @@ export default function AllProducts() {
                     {isLoading ? 'Loading...' : 'Previous'}
                   </PreviousLink>
                 </div>
-                <Grid data-test="product-grid">{itemsMarkup}</Grid>
+                <Grid data-test="product-grid" className="[&_.card-image]:transition-transform [&_.card-image]:duration-200 [&_.card-image:hover]:scale-[1.03]" layout="products">
+                  {itemsMarkup}
+                </Grid>
                 <div className="flex items-center justify-center mt-6">
                   <NextLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary w-full">
                     {isLoading ? 'Loading...' : 'Next'}

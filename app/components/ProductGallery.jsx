@@ -29,7 +29,8 @@ export function ProductGallery({media, className}) {
         const style = [
           isFullWidth ? 'md:col-span-2' : 'md:col-span-1',
           isFirst || isFourth ? '' : 'md:aspect-[4/5]',
-          'aspect-square snap-center card-image bg-white dark:bg-contrast/10 w-mobileGallery md:w-full',
+          'aspect-square snap-center card-image bg-contrast w-mobileGallery md:w-full',
+          'transition-transform duration-200',
         ].join(' ');
 
         return (
@@ -44,7 +45,7 @@ export function ProductGallery({media, className}) {
                     ? '(min-width: 48em) 60vw, 90vw'
                     : '(min-width: 48em) 30vw, 90vw'
                 }
-                className="object-cover w-full h-full aspect-square fadeIn"
+                className="object-contain w-full h-full aspect-square fadeIn img-cutout opacity-95"
               />
             )}
           </div>

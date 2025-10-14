@@ -4,9 +4,17 @@
 
 /* Tokens */
 :root {
-  --color-primary: 20 20 20; /* Text, buttons, etc. */
-  --color-contrast: 250 250 249; /* Backgrounds, borders, etc. */
-  --color-accent: 191 72 0; /* Labels like "On sale" */
+  /* Valcee brand palette */
+  --valcee-sand: 251 250 241; /* #fbfaf1 */
+  --valcee-gold: 193 147 107; /* #c1936b */
+  --valcee-cocoa: 99 75 55; /* #634b37 */
+  --valcee-ink: 38 47 59; /* #262f3b */
+  --valcee-slate: 63 74 89; /* #3f4a59 */
+
+  /* Map to Hydrogen semantic tokens */
+  --color-primary: var(--valcee-sand); /* text */
+  --color-contrast: var(--valcee-cocoa); /* backgrounds */
+  --color-accent: var(--valcee-gold); /* accents */
   --font-size-fine: 0.75rem; /* text-xs */
   --font-size-copy: 1rem; /* text-base */
   --font-size-lead: 1.125rem; /* text-lg */
@@ -36,9 +44,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-primary: 250 250 250;
-    --color-contrast: 32 33 36;
-    --color-accent: 235 86 40;
+    /* Keep brand cocoa in dark mode for consistency */
+    --color-primary: var(--valcee-sand);
+    --color-contrast: var(--valcee-cocoa);
+    --color-accent: var(--valcee-gold);
   }
 }
 
@@ -63,7 +72,8 @@ shop-pay-button {
   }
 
   body {
-    @apply border-primary/10 bg-contrast text-primary/90 antialiased;
+    @apply border-primary/10 bg-contrast text-primary antialiased;
+    /* Remove default backgrounds from children by default where possible */
   }
 
   html {
@@ -137,6 +147,17 @@ shop-pay-button {
 }
 
 @layer utilities {
+  /* Always-remove-white backgrounds for sketch/placeholder art */
+  .img-cutout,
+  .img-cutout img,
+  img[src*="/images/collections/"] {
+    mix-blend-mode: multiply;
+  }
+  /* Create a new stacking context so blending is stable */
+  .blend-isolate {
+    isolation: isolate;
+  }
+
   .fadeIn {
     opacity: 0;
     animation: fadeInAnimation ease 500ms forwards;
@@ -178,5 +199,12 @@ shop-pay-button {
     img {
       @apply aspect-[inherit] w-full object-cover;
     }
+  }
+
+  .text-accent {
+    color: rgb(var(--color-accent));
+  }
+  .bg-accent {
+    background-color: rgb(var(--color-accent));
   }
 }

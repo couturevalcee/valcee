@@ -14,6 +14,7 @@ import {Button} from '~/components/Button';
 import {getImageLoadingPriority} from '~/lib/const';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
+import {getMockCollections} from '~/lib/mockData.server';
 
 const PAGINATION_SIZE = 4;
 
@@ -24,20 +25,30 @@ export const headers = routeHeaders;
  */
 export const loader = async ({request, context: {storefront}}) => {
   const variables = getPaginationVariables(request, {pageBy: PAGINATION_SIZE});
-  const {collections} = await storefront.query(COLLECTIONS_QUERY, {
-    variables: {
-      ...variables,
-      country: storefront.i18n.country,
-      language: storefront.i18n.language,
-    },
-  });
+  try {
+    const {collections} = await storefront.query(COLLECTIONS_QUERY, {
+      variables: {
+        ...variables,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
+      },
+    });
 
-  const seo = seoPayload.listCollections({
-    collections,
-    url: request.url,
-  });
+    const seo = seoPayload.listCollections({
+      collections,
+      url: request.url,
+    });
 
-  return json({collections, seo});
+    return json({collections, seo});
+  } catch (e) {
+    console.error('Failed to load Collections index', e);
+    const emptyConnection = getMockCollections(4);
+    const seo = seoPayload.listCollections({
+      collections: emptyConnection,
+      url: request.url,
+    });
+    return json({collections: emptyConnection, seo});
+  }
 };
 
 /**

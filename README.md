@@ -1,58 +1,92 @@
-# Hydrogen template: Demo Store
+# Valcee Couture — Hydrogen Storefront
 
-Hydrogen is Shopify’s stack for headless commerce. Hydrogen is designed to dovetail with [Remix](https://remix.run/), Shopify’s full stack web framework. This template contains a **full-featured setup** of components, queries and tooling to get started with Hydrogen. It is deployed at [hydrogen.shop](https://hydrogen.shop)
+This is the Valcee Couture headless storefront built with Shopify Hydrogen (Remix) and Tailwind.
 
-[Check out Hydrogen docs](https://shopify.dev/custom-storefronts/hydrogen)
-[Get familiar with Remix](https://remix.run/docs/en/v1)
+- Tech: Hydrogen v2 (Remix), Tailwind CSS, Headless UI
+- Features: Branded header/footer, mobile-first home with snap, collections grid, product list/gallery, region selector, graceful fallbacks when Shopify data is unavailable
 
-## What's included
+## Requirements
 
-- Remix
-- Hydrogen
-- Oxygen
-- Shopify CLI
-- ESLint
-- Prettier
-- GraphQL generator
-- TypeScript and JavaScript flavors
-- Tailwind CSS (via PostCSS)
-- Full-featured setup of components and routes
+- Node.js 18+
+- A Shopify store and Storefront API token
 
-## Getting started
+## Quick start
 
-**Requirements:**
-
-- Node.js version 18.0.0 or higher
+1. Install deps
 
 ```bash
-npm create @shopify/hydrogen@latest -- --template demo-store
+npm install
 ```
 
-Remember to update `.env` with your shop's domain and Storefront API token!
+2. Create `.env` with your shop details (do NOT commit this file):
 
-## Building for production
-
-```bash
-npm run build
+```properties
+SESSION_SECRET="something-random"
+PUBLIC_STORE_DOMAIN=<your-store>.myshopify.com
+PUBLIC_STOREFRONT_API_TOKEN=<storefront-api-token>
+PUBLIC_CHECKOUT_DOMAIN=checkout.hydrogen.shop
+PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID=<optional-if-using-account-api>
+SHOP_ID=<optional-if-using-account-api>
 ```
 
-## Local development
+3. Dev server
 
 ```bash
 npm run dev
 ```
 
-## Setup for using Customer Account API (`/account` section)
+4. Build
 
-### Setup public domain using ngrok
+```bash
+npm run build
+```
 
-1. Setup a [ngrok](https://ngrok.com/) account and add a permanent domain (ie. `https://<your-ngrok-domain>.app`).
-1. Install the [ngrok CLI](https://ngrok.com/download) to use in terminal
-1. Start ngrok using `ngrok http --domain=<your-ngrok-domain>.app 3000`
+## Environment notes
 
-### Include public domain in Customer Account API settings
+- Ensure products/collections are published to the same Custom Storefront app that issued your Storefront API token.
+- Collection handles used on the homepage: `occasional`, `active`, `casual`, `lounge`.
+- The app includes mock fallbacks so local dev still renders if Shopify is unreachable.
 
-1. Go to your Shopify admin => `Hydrogen` or `Headless` app/channel => Customer Account API => Application setup
-1. Edit `Callback URI(s)` to include `https://<your-ngrok-domain>.app/account/authorize`
-1. Edit `Javascript origin(s)` to include your public domain `https://<your-ngrok-domain>.app` or keep it blank
-1. Edit `Logout URI` to include your public domain `https://<your-ngrok-domain>.app` or keep it blank
+## Deploy
+
+### Oxygen (recommended)
+
+1. Push this repo to GitHub (see below).
+2. In Shopify, open Hydrogen/Oxygen hosting and connect the repo.
+3. Add the environment variables in Oxygen:
+   - PUBLIC_STORE_DOMAIN
+   - PUBLIC_STOREFRONT_API_TOKEN
+   - SESSION_SECRET
+   - PUBLIC_CHECKOUT_DOMAIN
+   - (optional) PUBLIC_CUSTOMER_ACCOUNT_API_CLIENT_ID, SHOP_ID
+4. Deploy. Oxygen will build and host your app.
+
+### Vercel/Netlify (alternative)
+
+1. Connect the GitHub repo in your platform.
+2. Set the same environment variables.
+3. Use the default build command (`npm run build`) and output handled by Hydrogen adapter.
+
+## Git/GitHub
+
+- This repo already includes `.gitignore` and `README.md`. When creating the GitHub repo, do not auto-add a README or .gitignore to avoid merge issues.
+- Initialize and push:
+
+```bash
+git init
+git add .
+git commit -m "chore: initial import"
+git branch -M main
+git remote add origin <git@github.com:owner/repo.git>
+git push -u origin main
+```
+
+- Optional workflow: develop branch + PRs to main to get deploy previews.
+
+## Accounts (optional)
+
+If using the Customer Account API locally, expose your dev server via ngrok and whitelist the URLs in the app settings (see Hydrogen docs).
+
+## License
+
+Copyright © Valcee Couture. All rights reserved.

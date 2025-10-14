@@ -53,23 +53,81 @@ export async function loader({params, request, context}) {
     [],
   );
 
-  const {collection, collections} = await context.storefront.query(
-    COLLECTION_QUERY,
-    {
-      variables: {
-        ...paginationVariables,
-        handle: collectionHandle,
-        filters,
-        sortKey,
-        reverse,
-        country: context.storefront.i18n.country,
-        language: context.storefront.i18n.language,
+  let data;
+  try {
+    data = await context.storefront.query(
+      COLLECTION_QUERY,
+      {
+        variables: {
+          ...paginationVariables,
+          handle: collectionHandle,
+          filters,
+          sortKey,
+          reverse,
+          country: context.storefront.i18n.country,
+          language: context.storefront.i18n.language,
+        },
       },
-    },
-  );
+    );
+  } catch (e) {
+    console.error('Failed to load collection', collectionHandle, e);
+    data = {collection: null, collections: {nodes: [], pageInfo: {}}};
+  }
 
+  let {collection, collections} = data;
+
+  // Build a graceful placeholder collection if not found
   if (!collection) {
-    throw new Response('collection', {status: 404});
+    const prettyTitle = collectionHandle
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+
+    const names = ['Safari Coat', 'Afroteq Suit', 'Item 318', 'Little Black Dress'];
+    const makeSlug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const placeholderProducts = Array.from({length: 12}).map((_, i) => {
+      const name = names[i % names.length];
+      const handle = `${makeSlug(name)}-${i + 1}`;
+      return {
+        id: `placeholder-${collectionHandle}-${i}`,
+        title: name,
+        publishedAt: new Date().toISOString(),
+        handle,
+        vendor: 'Valcee Couture',
+        variants: {
+          nodes: [
+            {
+              id: `placeholder-var-${collectionHandle}-${i}`,
+              availableForSale: false,
+              image: null, // force placeholderSrc in card
+              price: {amount: '0.00', currencyCode: 'USD'},
+              compareAtPrice: null,
+              selectedOptions: [],
+              product: {handle, title: name},
+            },
+          ],
+        },
+        __placeholder: true,
+      };
+    });
+
+    collection = {
+      id: `placeholder-${collectionHandle}`,
+      handle: collectionHandle,
+      title: prettyTitle,
+      description: '',
+      seo: {description: '', title: prettyTitle},
+      image: null,
+      products: {
+        filters: [],
+        nodes: placeholderProducts,
+        pageInfo: {
+          hasPreviousPage: false,
+          hasNextPage: false,
+          endCursor: null,
+          startCursor: null,
+        },
+      },
+    };
   }
 
   const seo = seoPayload.collection({collection, url: request.url});
@@ -142,6 +200,8 @@ export default function Collection() {
 
   const {ref, inView} = useInView();
 
+  const placeholderImagePath = `/images/collections/${collection.handle}.png`;
+
   return (
     <>
       <PageHeader heading={collection.title}>
@@ -183,6 +243,7 @@ export default function Collection() {
                   nextPageUrl={nextPageUrl}
                   hasNextPage={hasNextPage}
                   state={state}
+                  placeholderImagePath={placeholderImagePath}
                 />
                 <div className="flex items-center justify-center mt-6">
                   <Button
@@ -226,6 +287,7 @@ function ProductsLoadedOnScroll({
   nextPageUrl,
   hasNextPage,
   state,
+  placeholderImagePath,
 }) {
   const navigate = useNavigate();
 
@@ -240,12 +302,14 @@ function ProductsLoadedOnScroll({
   }, [inView, navigate, state, nextPageUrl, hasNextPage]);
 
   return (
-    <Grid layout="products" data-test="product-grid">
+    <Grid layout="products" data-test="product-grid" className="[&_.card-image]:transition-transform [&_.card-image]:duration-200 [&_.card-image:hover]:scale-[1.03]">
       {nodes.map((product, i) => (
         <ProductCard
           key={product.id}
           product={product}
           loading={getImageLoadingPriority(i)}
+          placeholderSrc={placeholderImagePath}
+          className={product.__placeholder ? 'pointer-events-none' : undefined}
         />
       ))}
     </Grid>
