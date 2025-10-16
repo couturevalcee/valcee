@@ -44,9 +44,13 @@ export async function loader({params, request, context}) {
     (filters, [key, value]) => {
       if (key.startsWith(FILTER_URL_PREFIX)) {
         const filterKey = key.substring(FILTER_URL_PREFIX.length);
-        filters.push({
-          [filterKey]: JSON.parse(value),
-        });
+        try {
+          filters.push({
+            [filterKey]: JSON.parse(value),
+          });
+        } catch (e) {
+          console.warn('Invalid filter JSON:', key, value);
+        }
       }
       return filters;
     },
@@ -139,18 +143,23 @@ export async function loader({params, request, context}) {
   const appliedFilters = filters
     .map((filter) => {
       const foundValue = allFilterValues.find((value) => {
-        const valueInput = JSON.parse(value.input);
-        // special case for price, the user can enter something freeform (still a number, though)
-        // that may not make sense for the locale/currency.
-        // Basically just check if the price filter is applied at all.
-        if (valueInput.price && filter.price) {
-          return true;
+        try {
+          const valueInput = JSON.parse(value.input);
+          // special case for price, the user can enter something freeform (still a number, though)
+          // that may not make sense for the locale/currency.
+          // Basically just check if the price filter is applied at all.
+          if (valueInput.price && filter.price) {
+            return true;
+          }
+          return (
+            // This comparison should be okay as long as we're not manipulating the input we
+            // get from the API before using it as a URL param.
+            JSON.stringify(valueInput) === JSON.stringify(filter)
+          );
+        } catch (e) {
+          console.warn('Invalid filter value JSON:', value.input);
+          return false;
         }
-        return (
-          // This comparison should be okay as long as we're not manipulating the input we
-          // get from the API before using it as a URL param.
-          JSON.stringify(valueInput) === JSON.stringify(filter)
-        );
       });
       if (!foundValue) {
         // eslint-disable-next-line no-console
@@ -160,17 +169,25 @@ export async function loader({params, request, context}) {
 
       if (foundValue.id === 'filter.v.price') {
         // Special case for price, we want to show the min and max values as the label.
-        const input = JSON.parse(foundValue.input);
-        const min = parseAsCurrency(input.price?.min ?? 0, locale);
-        const max = input.price?.max
-          ? parseAsCurrency(input.price.max, locale)
-          : '';
-        const label = min && max ? `${min} - ${max}` : 'Price';
+        try {
+          const input = JSON.parse(foundValue.input);
+          const min = parseAsCurrency(input.price?.min ?? 0, locale);
+          const max = input.price?.max
+            ? parseAsCurrency(input.price.max, locale)
+            : '';
+          const label = min && max ? `${min} - ${max}` : 'Price';
 
-        return {
-          filter,
-          label,
-        };
+          return {
+            filter,
+            label,
+          };
+        } catch (e) {
+          console.warn('Invalid price filter JSON:', foundValue.input);
+          return {
+            filter,
+            label: 'Price',
+          };
+        }
       }
       return {
         filter,

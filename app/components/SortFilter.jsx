@@ -62,7 +62,12 @@ export function FiltersDrawer({filters = [], appliedFilters = []}) {
     switch (filter.type) {
       case 'PRICE_RANGE':
         const priceFilter = params.get(`${FILTER_URL_PREFIX}price`);
-        const price = priceFilter ? JSON.parse(priceFilter) : undefined;
+        let price = undefined;
+        try {
+          price = priceFilter ? JSON.parse(priceFilter) : undefined;
+        } catch (e) {
+          console.warn('Invalid price filter JSON:', priceFilter);
+        }
         const min = isNaN(Number(price?.min)) ? undefined : Number(price?.min);
         const max = isNaN(Number(price?.max)) ? undefined : Number(price?.max);
 
@@ -281,7 +286,15 @@ function PriceRangeFilter({max, min}) {
  * @return {URLSearchParams}
  */
 function filterInputToParams(rawInput, params) {
-  const input = typeof rawInput === 'string' ? JSON.parse(rawInput) : rawInput;
+  let input = rawInput;
+  if (typeof rawInput === 'string') {
+    try {
+      input = JSON.parse(rawInput);
+    } catch (e) {
+      console.warn('Invalid filter input JSON:', rawInput);
+      return params;
+    }
+  }
 
   Object.entries(input).forEach(([key, value]) => {
     if (params.has(`${FILTER_URL_PREFIX}${key}`, JSON.stringify(value))) {

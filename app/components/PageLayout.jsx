@@ -43,7 +43,7 @@ export function PageLayout({children, layout}) {
         <main role="main" id="mainContent" className="flex-grow">
           {children}
         </main>
-        {/* Bottom bar per Valcee mocks */}
+        {/* Restored BottomBar */}
         <BottomBar />
       </div>
       {footerMenu && !isHome && <Footer menu={footerMenu} />}
@@ -108,12 +108,11 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
     <header
       role="banner"
       className={`${
-        isHome
-          ? 'bg-contrast text-primary'
-          : 'bg-contrast text-primary'
+        isHome ? 'bg-contrast text-primary' : 'bg-contrast text-primary'
       } flex items-center h-nav sticky z-40 top-0 justify-between w-full leading-none gap-4 px-4 md:px-8`}
     >
-      <div className="flex items-center justify-start w-full">
+      {/* Left: menu trigger */}
+      <div className="flex items-center">
         <button
           onClick={openMenu}
           aria-label="Open Menu"
@@ -123,8 +122,9 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
         </button>
       </div>
 
+      {/* Center: brand logo */}
       <Link
-        className="flex items-center self-stretch leading-[3rem] md:leading-[4rem] justify-center flex-grow w-full h-full"
+        className="flex items-center self-stretch leading-[3rem] md:leading-[4rem] justify-center flex-grow h-full"
         to="/"
         aria-label={title || 'Valcee Couture'}
       >
@@ -136,7 +136,8 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
         />
       </Link>
 
-      <div className="flex items-center justify-end w-full">
+      {/* Right: info, help, cart */}
+      <div className="flex items-center justify-end gap-4">
         <Link
           to={params.locale ? `/${params.locale}/editorial` : '/editorial'}
           aria-label="Information"
@@ -144,38 +145,9 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
         >
           <span className="text-base leading-none">i</span>
         </Link>
+        {/* Help & Cart moved back to BottomBar */}
       </div>
     </header>
-  );
-}
-
-/**
- * Fixed bottom bar with left "?" (help) and right cart badge
- */
-function BottomBar() {
-  const isHome = useIsHomePath();
-  const rootData = useRouteLoaderData('root');
-  if (!rootData) return null;
-  return (
-    <div className="fixed bottom-4 left-0 right-0 pointer-events-none">
-      <div className="max-w-screen mx-auto">
-        <div className="flex justify-between px-6">
-          <Link
-            to="/policies"
-            className="pointer-events-auto relative flex items-center justify-center w-8 h-8 text-primary"
-            aria-label="Help"
-          >
-            <span className="text-xl leading-none">?</span>
-          </Link>
-          <div className="pointer-events-auto">
-            <CartCount isHome={isHome} openCart={() => {
-              const event = new CustomEvent('open-cart');
-              window.dispatchEvent(event);
-            }} />
-          </div>
-        </div>
-      </div>
-    </div>
   );
 }
 
@@ -450,5 +422,34 @@ function FooterMenu({menu}) {
         </div>
       ))}
     </nav>
+  );
+}
+
+function BottomBar() {
+  const rootData = useRouteLoaderData('root');
+  if (!rootData) return null;
+  return (
+    <div className="fixed inset-x-0 bottom-2 md:bottom-6 pointer-events-none z-30">
+      <div className="relative w-full h-12 md:h-14">
+        {/* Help (left corner) */}
+        <Link
+          to="/policies"
+          aria-label="Help"
+          className="pointer-events-auto absolute left-2 md:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 md:w-10 md:h-10 text-primary border border-primary/20 rounded-full backdrop-blur-sm bg-contrast/70 hover:bg-contrast transition"
+        >
+          <span className="text-lg md:text-xl leading-none">?</span>
+        </Link>
+        {/* Cart (right corner) */}
+        <div className="pointer-events-auto absolute right-2 md:right-4 top-1/2 -translate-y-1/2">
+          <CartCount
+            isHome={false}
+            openCart={() => {
+              const event = new CustomEvent('open-cart');
+              window.dispatchEvent(event);
+            }}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
