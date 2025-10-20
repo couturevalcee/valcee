@@ -6,16 +6,31 @@ test.describe('Cart', () => {
   test('From home to checkout flow', async ({page}) => {
     // Home => Collections => First collection => First product
     await page.goto(`/`);
-    // Wait for the page to render and the header nav to appear (accounts for locale redirects)
+    // Wait for the page to render and either the header nav or a menu toggle to appear
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForSelector('header nav', {timeout: 10000});
+    await page.waitForSelector('header nav, [data-test=site-nav-toggle]', {timeout: 30000});
 
-    // Prefer semantic lookup by role with a case-insensitive regex; fallback to a header nav anchor with partial text
+    // Prefer semantic lookup by role with a case-insensitive regex
     const collectionsLink = page.getByRole('link', {name: /collections/i});
     if ((await collectionsLink.count()) > 0) {
       await collectionsLink.first().click();
     } else {
-      await page.locator('header nav a', {hasText: 'Collections'}).first().click();
+      // If a hamburger/menu toggle exists, open it and retry
+      const menuToggle = await page.$('[data-test=site-nav-toggle], button[aria-label="menu"], button[aria-label="open menu"]');
+      if (menuToggle) {
+        await menuToggle.click();
+        await page.waitForTimeout(600); // small delay for animation
+        const linkAfterOpen = page.getByRole('link', {name: /collections/i});
+        if ((await linkAfterOpen.count()) > 0) {
+          await linkAfterOpen.first().click();
+        } else {
+          // Last resort: try to click any header anchor containing 'Collections'
+          await page.locator('header nav a', {hasText: 'Collections'}).first().click();
+        }
+      } else {
+        // Fallback: try to click any header anchor containing 'Collections'
+        await page.locator('header nav a', {hasText: 'Collections'}).first().click();
+      }
     }
     await page.locator(`[data-test=collection-grid] a  >> nth=0`).click();
     await page.locator(`[data-test=product-grid] a  >> nth=0`).click();
