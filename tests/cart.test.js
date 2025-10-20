@@ -6,7 +6,17 @@ test.describe('Cart', () => {
   test('From home to checkout flow', async ({page}) => {
     // Home => Collections => First collection => First product
     await page.goto(`/`);
-    await page.locator(`header nav a:text-is("Collections")`).click();
+    // Wait for the page to render and the header nav to appear (accounts for locale redirects)
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForSelector('header nav', {timeout: 10000});
+
+    // Prefer semantic lookup by role with a case-insensitive regex; fallback to a header nav anchor with partial text
+    const collectionsLink = page.getByRole('link', {name: /collections/i});
+    if ((await collectionsLink.count()) > 0) {
+      await collectionsLink.first().click();
+    } else {
+      await page.locator('header nav a', {hasText: 'Collections'}).first().click();
+    }
     await page.locator(`[data-test=collection-grid] a  >> nth=0`).click();
     await page.locator(`[data-test=product-grid] a  >> nth=0`).click();
 
