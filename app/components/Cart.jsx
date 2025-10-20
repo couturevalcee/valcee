@@ -55,7 +55,7 @@ export function CartDetails({layout, cart}) {
       {cartHasItems && (
         <CartSummary cost={cart.cost} layout={layout}>
           <CartDiscounts discountCodes={cart.discountCodes} />
-          <CartCheckoutActions checkoutUrl={cart.checkoutUrl} />
+          <CartCheckoutActions checkoutUrl={cart.checkoutUrl} cart={cart} />
         </CartSummary>
       )}
     </div>
@@ -172,19 +172,67 @@ function CartLines({layout = 'drawer', lines: cartLines}) {
 }
 
 /**
- * @param {{checkoutUrl: string}}
+ * @param {{checkoutUrl: string, cart?: any}}
  */
-function CartCheckoutActions({checkoutUrl}) {
-  if (!checkoutUrl) return null;
+function CartCheckoutActions({checkoutUrl, cart}) {
+  // If checkoutUrl already present on cart, link directly to it
+  if (checkoutUrl) {
+    return (
+      <div className="flex flex-col mt-2">
+        <a href={checkoutUrl} target="_self">
+          <Button as="span" width="full">
+            Continue to Checkout
+          </Button>
+        </a>
+      </div>
+    );
+  }
+
+  // Otherwise call the server-side proxy to create the cart and receive a checkout URL
+  const lines = (cart?.lines && Array.isArray(cart.lines.items) ? cart.lines.items : [])
+    .map((line) => ({
+      merchandiseId: line?.merchandise?.id || null,
+      quantity: line?.quantity || 1,
+    }))
+    .filter((l) => l.merchandiseId);
+
+  async function handleCreateCheckout(e) {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/checkout/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({lines}),
+      });
+      const payload = await res.json();
+      if (!res.ok) {
+        console.error('Checkout create failed', payload);
+        // Basic error handling: open alert. Keep UX simple for now.
+        alert(payload.error || (payload.errors && payload.errors.map((e) => e.message).join(', ')) || 'Failed to create checkout');
+        return;
+      }
+      if (payload.url) {
+        window.location.href = payload.url;
+      } else {
+        alert('No checkout URL returned');
+      }
+    } catch (err) {
+      console.error('Error creating checkout', err);
+      alert('Error creating checkout');
+    }
+  }
+
+  if (!lines.length) return null;
 
   return (
     <div className="flex flex-col mt-2">
-      <a href={checkoutUrl} target="_self">
+      <button onClick={handleCreateCheckout} className="button-primary">
         <Button as="span" width="full">
           Continue to Checkout
         </Button>
-      </a>
-      {/* @todo: <CartShopPayButton cart={cart} /> */}
+      </button>
     </div>
   );
 }

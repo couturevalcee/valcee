@@ -1,0 +1,67 @@
+Sprint Name,Weeks,Epic,User Story / Task,Priority,Status
+Sprint 0: Foundation & Design Systems,1/2/2025,Project Setup,Set up GitHub repository with main and staging branches.,Critical,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Project Setup,Set up Vercel project and link to GitHub for CI/CD.,Critical,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Project Setup,Purchase and configure the primary domain name.,Critical,To Do
+Sprint 0: Foundation & Design Systems,1/2/2025,Account Config,"Set up Shopify store, install Headless channel, and generate Storefront API keys.",Critical,In Progress
+Sprint 0: Foundation & Design Systems,1/2/2025,Account Config,"Set up Cloudinary account, configure DAM, and generate API keys.",Critical,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Account Config,"Set up Google Workspace for business email (e.g., support@yourbrand.com).",High,To Do
+Sprint 0: Foundation & Design Systems,1/2/2025,Account Config,"Create accounts for Klaviyo, Gorgias, Algolia, Cookiebot, and Microsoft Clarity.",Medium,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Design,"Finalize brand guidelines (logo, typography, color palette).",Critical,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Design,"Create high-fidelity mockups/prototypes in Figma for key pages (Homepage, PLP, PDP, Cart).",Critical,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Development,Initialize Next.js project and install core dependencies (Tailwind CSS).,High,Done
+Sprint 0: Foundation & Design Systems,1/2/2025,Development,"Set up project structure, environment variables (.env) for all API keys.",High,In Progress
+Sprint 0: Foundation & Design Systems,1/2/2025,Development,"Decide and configure client-side state management solution (e.g., React Context, Zustand).",High,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,"USER STORY: As a shopper, I want to view a collection of products on a Product Listing Page (PLP).",Critical,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,TASK: Define and test core GraphQL queries in Shopify's GraphiQL App.,High,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,TASK: Develop reusable Product Card component based on Figma designs.,High,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,TASK: Connect to Shopify Storefront API to fetch and display collection/product data.,High,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,"USER STORY: As a shopper, I want to view a detailed Product Detail Page (PDP) with images & a description.",Critical,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,TASK: Develop PDP layout component based on Figma designs.,High,To Do
+Sprint 1: Core Product Experience,3/4/2025,Core Commerce,TASK: Integrate Cloudinary to display images/videos sourced from Shopify metafields.,High,To Do
+Sprint 1: Core Product Experience,3/4/2025,DevOps,Set up Shopify product admin with Cloudinary upload widget for streamlined media uploads.,Medium,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,"USER STORY: As a shopper, I want to add a product to my cart.",Critical,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,TASK: Implement client-side state management for the cart using the chosen solution.,High,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,"TASK: Develop ""Add to Cart"" functionality on the PDP that interacts with the Shopify Cart API.",High,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,"USER STORY: As a shopper, I want to view my cart to see what I've added.",Critical,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,"TASK: Develop the Cart component (e.g., a slide-out panel) based on Figma designs.",High,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,"USER STORY: As a shopper, I want to complete my purchase securely.",Critical,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Core Commerce,TASK: Implement logic to retrieve and redirect the user to the Shopify Checkout URL.,High,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Marketing,Integrate Klaviyo's web tracking snippet.,High,To Do
+Sprint 2: Cart & Checkout Flow,5/6/2025,Marketing,"TASK: Fire ""Added to Cart"" event to Klaviyo.",Medium,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Content & SEO,"USER STORY: As a visitor, I want to learn about the brand on an ""About Us"" page.",High,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Content & SEO,TASK: Develop a flexible static page template.,High,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Content & SEO,"TASK: Build out About, Contact, Shipping, and Returns Policy pages with placeholder content.",Medium,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Content & SEO,"TASK: Implement dynamic SEO metadata (titles, descriptions) on all pages using data from Shopify.",High,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Legal,"USER STORY: As a visitor, I want to understand and control how my data is used.",Critical,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Legal,TASK: Integrate Cookiebot CMP to manage tracking consent.,Critical,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Legal,"TASK: Ensure tracking scripts (Klaviyo, GA, Clarity) only fire after consent is given.",Critical,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Product Discovery,"USER STORY: As a shopper, I want to search for a product by name.",High,To Do
+"Sprint 3: Content, Compliance & Discovery",7/8/2025,Product Discovery,TASK: Implement Phase 1 Search: Build a search UI that queries the Shopify Storefront API.,High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Analytics,"USER STORY: As the business owner, I want to understand website traffic and user behavior.",High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Analytics,TASK: Integrate Google Analytics and Google Search Console.,High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Analytics,TASK: Integrate Microsoft Clarity for heatmaps and session recordings.,Medium,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Customer Support,"USER STORY: As the support team, I want to see a customer's order history when they contact us.",High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Customer Support,TASK: Configure Gorgias to pull from the support@ inbox.,High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Customer Support,TASK: Connect Gorgias to the Shopify backend to sync customer/order data.,High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Security & DevOps,Set up Cloudflare and route the domain through it to enable the WAF.,High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Security & DevOps,Enable GitHub Dependabot for automatic vulnerability scanning.,High,To Do
+"Sprint 4: Analytics, Support & Security Hardening",9/10/2025,Testing,"TASK: Perform full end-to-end testing: place a test order, verify it in all systems (Shopify, Gorgias, Klaviyo), and process a manual return.",Critical,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Content,"TASK: Brand Manager to upload all final product data, images, and marketing copy.",Critical,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Content,"TASK: Customize Shopify transactional emails (Order Confirmation, etc.) with brand assets.",High,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Content,"TASK: Design and build the Klaviyo ""Abandoned Cart"" email flow.",High,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Testing,TASK: Brand Manager / Stakeholder to perform full User Acceptance Testing (UAT) on the staging environment.,Critical,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Testing,TASK: Address any final bugs or feedback from UAT.,Critical,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Launch,TASK (Lead Developer): Create formal Go-Live checklist document covering all systems.,Critical,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Launch,TASK: Deploy the main branch to production.,Critical,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Launch,TASK: GO-LIVE.,-,To Do
+"Sprint 5: Content Population, UAT & Go-Live",11/12/2025,Launch,TASK: Post-launch monitoring of all systems.,Critical,To Do
+Post-Launch Backlog,Future Sprints,Product Discovery,"USER STORY: As a shopper, I want a lightning-fast, typo-tolerant search experience.",High,To Do
+Post-Launch Backlog,Future Sprints,Product Discovery,TASK: Integrate Algolia to replace the native Shopify search.,High,To Do
+Post-Launch Backlog,Future Sprints,Returns,"USER STORY: As a customer, I want to easily manage my return or exchange through a self-service portal.",High,To Do
+Post-Launch Backlog,Future Sprints,Returns,TASK: Integrate Loop Returns and configure its portal.,High,To Do
+Post-Launch Backlog,Future Sprints,Backups,"USER STORY: As the business owner, I want to ensure my store data is automatically backed up.",High,To Do
+Post-Launch Backlog,Future Sprints,Backups,TASK: Subscribe to and configure Rewind for Shopify.,High,To Do
+Post-Launch Backlog,Future Sprints,Checkout,"USER STORY: As a shopper, I want a seamless checkout experience that stays on the brand's domain.",Medium,To Do
+Post-Launch Backlog,Future Sprints,Checkout,TASK: Upgrade to Shopify Plus and refactor the checkout flow to use Checkout Extensibility.,Medium,To Do
+Post-Launch Backlog,Future Sprints,Content Mgmt,"USER STORY: As the marketing team, I want to create and edit landing pages without developer help.",Medium,To Do
+Post-Launch Backlog,Future Sprints,Content Mgmt,TASK: Evaluate and integrate a headless CMS like Sanity.io or Contentful.,Medium,To Do

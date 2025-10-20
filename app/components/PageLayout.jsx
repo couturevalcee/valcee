@@ -136,16 +136,9 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
         />
       </Link>
 
-      {/* Right: info, help, cart */}
+      {/* Right: cart */}
       <div className="flex items-center justify-end gap-4">
-        <Link
-          to={params.locale ? `/${params.locale}/editorial` : '/editorial'}
-          aria-label="Information"
-          className="relative flex items-center justify-center w-8 h-8 text-primary"
-        >
-          <span className="text-base leading-none">i</span>
-        </Link>
-        {/* Help & Cart moved back to BottomBar */}
+        <CartCount isHome={isHome} openCart={openCart} />
       </div>
     </header>
   );
@@ -435,20 +428,12 @@ function BottomBar() {
         <Link
           to="/policies"
           aria-label="Help"
-          className="pointer-events-auto absolute left-2 md:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-9 h-9 md:w-10 md:h-10 text-primary border border-primary/20 rounded-full backdrop-blur-sm bg-contrast/70 hover:bg-contrast transition"
+          className="pointer-events-auto absolute left-2 md:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-primary focus:ring-primary/5"
         >
-          <span className="text-lg md:text-xl leading-none">?</span>
+          <span className="text-xl leading-none">?</span>
         </Link>
         {/* Cart (right corner) */}
-        <div className="pointer-events-auto absolute right-2 md:right-4 top-1/2 -translate-y-1/2">
-          <CartCount
-            isHome={false}
-            openCart={() => {
-              const event = new CustomEvent('open-cart');
-              window.dispatchEvent(event);
-            }}
-          />
-        </div>
+        {/* Cart removed from bottom bar: cart is now available in top header */}
       </div>
     </div>
   );

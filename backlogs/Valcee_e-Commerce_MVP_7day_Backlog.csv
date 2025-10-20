@@ -1,0 +1,26 @@
+Sprint Name,Weeks,Epic,User Story / Task,Priority,Status
+MVP Launch Week,2025-10-18..2025-10-24,Prep,Confirm repo, Shopify admin, domain registrar, payment provider, and Google Workspace access,Critical,In Progress
+MVP Launch Week,2025-10-18..2025-10-24,Account Config,Complete Shopify store settings: business address (Kamloops, BC), payouts, tax settings (GST + BC PST),C r i t i c a l,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Payments,Enable Shopify Payments (or Stripe alternative) and verify test payments,Critical,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Domain,Purchase and configure primary domain DNS (point to Oxygen/Vercel),Critical,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Deployment,Deploy Hydrogen app to staging; set env vars (SESSION_SECRET, PUBLIC_STORE_DOMAIN, PUBLIC_STOREFRONT_API_TOKEN, etc.),Critical,In Progress
+MVP Launch Week,2025-10-18..2025-10-24,Products,Upload minimal product catalog (5-12 SKUs) with images and create launch collections (occasional, active, casual, lounge),Critical,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Frontend,Verify PLP & PDP render real Shopify data; fix GraphQL/query issues,High,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Cart & Checkout,Verify Add-to-Cart flow and server-side checkout endpoint (/api/checkout/create) end-to-end; test redirect to checkout URL,Critical,In Progress
+MVP Launch Week,2025-10-18..2025-10-24,Shipping,Configure shipping profiles for Canada (domestic rates) and test at checkout,High,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Emails,Configure Google Workspace for support@ and verify Shopify transactional email delivery,High,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Legal,Publish Privacy Policy, Terms of Service, Shipping & Returns pages,High,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Analytics,Integrate GA4 basic tracking and capture purchase events,Medium,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Testing,Run Playwright e2e tests (cart → checkout) and perform manual UAT,Critical,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Testing,Add E2E test resiliency and locale-aware routing updates to tests (update selectors, increase timeouts),High,To Do
+MVP Launch Week,2025-10-18..2025-10-24,Launch,Deploy main branch to production,run smoke tests,monitor first 24 hours and document rollback plan,Critical,To Do
+MVP Launch Week,2025-10-18..2025-10-24,PostLaunch,Create post-launch backlog with deferred items (Algolia, Klaviyo flows, Reviews, Returns portal),Medium,To Do
+
+# Items already completed (copied from main backlog for audit visibility)
+MVP Launch Week,2025-10-18..2025-10-24,Project Setup,Set up GitHub repository with main and staging branches.,Critical,Done
+MVP Launch Week,2025-10-18..2025-10-24,Project Setup,Set up Vercel project and link to GitHub for CI/CD.,Critical,Done
+MVP Launch Week,2025-10-18..2025-10-24,Account Config,Set up Cloudinary account, configure DAM, and generate API keys.,Critical,Done
+MVP Launch Week,2025-10-18..2025-10-24,Design,Finalize brand guidelines and Figma prototypes (Homepage, PLP, PDP, Cart).,Critical,Done
+MVP Launch Week,2025-10-18..2025-10-24,Development,Initialize Next.js/Hydrogen project and core dependencies (Tailwind CSS).,High,Done
+MVP Launch Week,2025-10-18..2025-10-24,Development,Set up project structure and initial env var strategy (.env templates).,High,In Progress
+MVP Launch Week,2025-10-18..2025-10-24,Development,Decide on client-side state management (React Context / Zustand),High,To Do

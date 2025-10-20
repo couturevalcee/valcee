@@ -50,6 +50,7 @@ export async function loader({params, request, context}) {
           });
         } catch (e) {
           console.warn('Invalid filter JSON:', key, value);
+          // Skip invalid filters instead of breaking the app
         }
       }
       return filters;
