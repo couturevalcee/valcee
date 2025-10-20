@@ -7,6 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
+        'valcee-sand': '#fbfaf1',
+        'valcee-gold': '#c1936b',
+        'valcee-cocoa': '#634b37',
+        'valcee-ink': '#262f3b',
+        'valcee-slate': '#3f4a59',
+      },
+      colors: {
         primary: 'rgb(var(--color-primary) / <alpha-value>)',
         contrast: 'rgb(var(--color-contrast) / <alpha-value>)',
         notice: 'rgb(var(--color-accent) / <alpha-value>)',
