@@ -1,4 +1,4 @@
-import {useParams, Form, Await, useRouteLoaderData} from '@remix-run/react';
+import {useParams, Form, Await, useRouteLoaderData, useLocation} from '@remix-run/react';
 import useWindowScroll from 'react-use/esm/useWindowScroll';
 import {Disclosure, Transition} from '@headlessui/react';
 import {Suspense, useEffect, useMemo, useState, useRef} from 'react';
@@ -16,6 +16,7 @@ import {
   IconLogin,
   IconAccount,
   IconBag,
+  IconClose,
   IconSearch,
 } from '~/components/Icon';
 import {useIsHomePath} from '~/lib/utils';
@@ -28,6 +29,25 @@ import {useCartFetchers} from '~/hooks/useCartFetchers';
 export function PageLayout({children, layout}) {
   const {headerMenu, footerMenu} = layout || {};
   const isHome = useIsHomePath();
+  const location = useLocation();
+  const isManageRoute = (location?.pathname || '').toLowerCase().includes('manage');
+  const mainStyle = isManageRoute
+    ? {
+        // Standard document scroll for manage pages
+        paddingTop: 'var(--height-nav)',
+        paddingBottom: 'calc(16vh + env(safe-area-inset-bottom, 0px))',
+      }
+    : {
+        // Bounded scroll window between header and bottom controls
+        position: 'fixed',
+        top: 'var(--height-nav)',
+        left: 0,
+        right: 0,
+        bottom: 'calc(8.5vh + env(safe-area-inset-bottom, 0px))',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain',
+      };
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -40,13 +60,36 @@ export function PageLayout({children, layout}) {
         {layout?.shop?.name && (
           <Header title={layout.shop.name} menu={headerMenu} />
         )}
-        <main role="main" id="mainContent" className="flex-grow">
-          {children}
+          <main
+            role="main"
+            id="mainContent"
+            className="flex-grow"
+            style={mainStyle}
+          >
+          <div className="relative h-full">
+            {/* Always-on top soft edge (fixed to the top boundary of the scroll window) */}
+            <div
+              aria-hidden
+              className="pointer-events-none fixed left-0 right-0"
+              style={{top: 'var(--height-nav)', height: '3.5vh', zIndex: 45}}
+            >
+              <div className="w-full h-full bg-gradient-to-b from-contrast to-transparent" />
+            </div>
+
+            <div className="relative">
+              {children}
+            </div>
+
+            {/* Bottom soft edge (inside scroll area, above bottom controls) */}
+            <div aria-hidden className="pointer-events-none sticky bottom-0 z-10" style={{height: '4.5vh'}}>
+              <div className="w-full h-full bg-gradient-to-t from-contrast to-transparent" />
+            </div>
+          </div>
         </main>
-        {/* Restored BottomBar */}
+        {/* Bottom Controls */}
         <BottomBar />
       </div>
-      {footerMenu && !isHome && <Footer menu={footerMenu} />}
+      {/* Footer removed site-wide */}
     </>
   );
 }
@@ -109,7 +152,7 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
       role="banner"
       className={`${
         isHome ? 'bg-contrast text-primary' : 'bg-contrast text-primary'
-      } flex items-center h-nav sticky z-40 top-0 justify-between w-full leading-none gap-4 px-4 md:px-8`}
+      } flex items-center h-nav fixed z-40 top-0 left-0 right-0 justify-between w-full leading-none gap-4 px-4 md:px-8 pt-[2vh] md:pt-[1.5vh] lg:pt-[1vh]`}
     >
       {/* Left: menu trigger */}
       <div className="flex items-center">
@@ -252,7 +295,7 @@ function MobileHeader({title, isHome, openCart, openMenu}) {
         isHome
           ? 'bg-primary/80 dark:bg-contrast/60 text-contrast dark:text-primary shadow-darkHeader'
           : 'bg-contrast/80 text-primary'
-      } flex lg:hidden items-center h-nav sticky backdrop-blur-lg z-40 top-0 justify-between w-full leading-none gap-4 px-4 md:px-8`}
+      } flex lg:hidden items-center h-nav fixed backdrop-blur-lg z-40 top-0 left-0 right-0 justify-between w-full leading-none gap-4 px-4 md:px-8 pt-[2vh] md:pt-[1.5vh] lg:pt-[1vh]`}
     >
       <div className="flex items-center justify-start w-full gap-4">
         <button
@@ -261,29 +304,6 @@ function MobileHeader({title, isHome, openCart, openMenu}) {
         >
           <IconMenu />
         </button>
-        <Form
-          method="get"
-          action={params.locale ? `/${params.locale}/search` : '/search'}
-          className="items-center gap-2 sm:flex"
-        >
-          <button
-            type="submit"
-            className="relative flex items-center justify-center w-8 h-8"
-          >
-            <IconSearch />
-          </button>
-          <Input
-            className={
-              isHome
-                ? 'focus:border-contrast/20 dark:focus:border-primary/20'
-                : 'focus:border-primary/20'
-            }
-            type="search"
-            variant="minisearch"
-            placeholder="Search"
-            name="q"
-          />
-        </Form>
       </div>
 
       <Link
@@ -378,63 +398,227 @@ function Badge({openCart, dark, count}) {
   );
 }
 
-function Footer({menu}) {
-  return (
-    <footer className="bg-contrast text-primary border-t border-primary/10">
-      <div className="max-w-screen-xl mx-auto px-6 py-10">
-        {menu ? (
-          <FooterMenu menu={menu} />
-        ) : (
-          <div className="text-sm opacity-70">Valcee Couture</div>
-        )}
-      </div>
-    </footer>
-  );
-}
-
-function FooterMenu({menu}) {
-  const items = menu?.items || [];
-  return (
-    <nav className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-      {items.map((item) => (
-        <div key={item.id}>
-          <Link to={item.to} target={item.target} className="underline-offset-4 hover:underline">
-            {item.title}
-          </Link>
-          {item.items?.length ? (
-            <ul className="mt-2 space-y-1">
-              {item.items.map((child) => (
-                <li key={child.id}>
-                  <Link to={child.to} target={child.target} className="text-sm opacity-80 underline-offset-4 hover:underline">
-                    {child.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </div>
-      ))}
-    </nav>
-  );
-}
+// Footer removed
 
 function BottomBar() {
   const rootData = useRouteLoaderData('root');
   if (!rootData) return null;
+
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const containerRef = useRef(null);
+  const searchInputRef = useRef(null);
+
+  // Click outside closes any open panel
+  useEffect(() => {
+    function onDocClick(e) {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(e.target)) {
+        setHelpOpen(false);
+        setSearchOpen(false);
+      }
+    }
+    const needsListener = helpOpen || searchOpen;
+    if (needsListener) document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [helpOpen, searchOpen]);
+
+  // Autofocus search input when the search panel opens
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  // staged help links so we can animate with staggered delays
+  const helpLinks = [
+    {to: '/policies/terms-of-service', label: 'Terms of Service'},
+    {to: '/policies/privacy-policy', label: 'Privacy Policy'},
+    {to: '/policies/shipping-policy', label: 'Shipping & Returns'},
+  ];
+
   return (
-    <div className="fixed inset-x-0 bottom-2 md:bottom-6 pointer-events-none z-30">
-      <div className="relative w-full h-12 md:h-14">
-        {/* Help (left corner) */}
-        <Link
-          to="/policies"
-          aria-label="Help"
-          className="pointer-events-auto absolute left-2 md:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 text-primary focus:ring-primary/5"
-        >
-          <span className="text-xl leading-none">?</span>
-        </Link>
-        {/* Cart (right corner) */}
-        {/* Cart removed from bottom bar: cart is now available in top header */}
+    <div className="fixed inset-x-0 pointer-events-none z-50" style={{bottom: '2.5vh'}}>
+      <div
+        ref={containerRef}
+        className="w-full flex items-center justify-between"
+        style={{
+          height: '6vh',
+          paddingLeft: 'max(3vw, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(3vw, env(safe-area-inset-right, 0px))',
+        }}
+      >
+        {/* Help (left) */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          <button
+            aria-expanded={helpOpen}
+            aria-controls="help-menu"
+            onClick={() => {
+              setHelpOpen((v) => !v);
+              setSearchOpen(false);
+            }}
+            className="tap flex items-center justify-center w-8 h-8 text-primary focus:ring-primary/5 bg-transparent"
+            aria-label={helpOpen ? 'Close help menu' : 'Open help menu'}
+          >
+            <span className="text-xl leading-none">{helpOpen ? '×' : '?'}</span>
+          </button>
+
+          <div id="help-menu" role="menu" aria-hidden={!helpOpen} style={{overflow: 'hidden'}}>
+            <nav
+              className={`origin-left transform-gpu ${
+                helpOpen
+                  ? 'scale-x-100 opacity-100 translate-y-0 pointer-events-auto drop-shadow-lg'
+                  : 'scale-x-0 opacity-0 -translate-y-[0.4vh] pointer-events-none drop-shadow-none'
+              }`}
+              style={{
+                willChange: 'transform, opacity, filter',
+                transition:
+                  'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring), filter var(--dur-slower) var(--ease-spring)',
+              }}
+            >
+              <div
+                className={`flex flex-wrap items-center gap-x-4 gap-y-2 bg-contrast/85 backdrop-blur-md text-primary rounded-md ring-1 ring-primary/10 ${
+                  helpOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.4vh]'
+                }`}
+                style={{
+                  padding: '1.6vh 3vw',
+                  transition:
+                    'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                }}
+              >
+              {helpLinks.map((l, i) => (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  role="menuitem"
+                  className={`text-sm ${helpOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'}`}
+                  onClick={() => setHelpOpen(false)}
+                  style={{
+                    transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                    transitionDelay: helpOpen ? `${i * 60}ms` : '0ms',
+                  }}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              </div>
+            </nav>
+          </div>
+        </div>
+
+        {/* Search (right) */}
+        <div className="pointer-events-auto flex items-center gap-2 flex-row-reverse">
+          <button
+            aria-expanded={searchOpen}
+            aria-controls="search-menu"
+            onClick={() => {
+              setSearchOpen((v) => !v);
+              setHelpOpen(false);
+            }}
+            className="tap flex items-center justify-center w-8 h-8 text-primary focus:ring-primary/5 bg-transparent"
+            aria-label={searchOpen ? 'Close search' : 'Open search'}
+          >
+            {searchOpen ? (
+              <IconClose className="w-7 h-7 md:w-8 md:h-8" />
+            ) : (
+              <IconSearch className="w-7 h-7 md:w-8 md:h-8" />
+            )}
+          </button>
+
+          {/* Desktop/tablet inline tray (hidden on mobile) */}
+          <div id="search-menu" role="menu" aria-hidden={!searchOpen} className="hidden md:block" style={{overflow: 'hidden'}}>
+            <nav
+              className={`origin-right transform-gpu ${
+                searchOpen
+                  ? 'scale-x-100 opacity-100 translate-y-0 pointer-events-auto drop-shadow-lg'
+                  : 'scale-x-0 opacity-0 -translate-y-[0.4vh] pointer-events-none drop-shadow-none'
+              }`}
+              style={{
+                willChange: 'transform, opacity, filter',
+                transition:
+                  'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring), filter var(--dur-slower) var(--ease-spring)',
+              }}
+            >
+              <div
+                className={`flex flex-wrap items-center gap-x-3 gap-y-2 bg-contrast/85 backdrop-blur-md text-primary rounded-md ring-1 ring-primary/10 ${
+                  searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.4vh]'
+                }`}
+                style={{
+                  padding: '1.2vh 2.6vw',
+                  transition:
+                    'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                }}
+              >
+                <form role="search" action="/search" method="get" className="flex items-center gap-2 w-full">
+                  <input
+                    ref={searchInputRef}
+                    name="q"
+                    type="search"
+                    placeholder="Search…"
+                    className={`${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} w-[70vw] md:w-[42vw] max-w-[90vw] md:max-w-[50vw] text-primary placeholder:text-primary/60 bg-contrast/30 rounded-full px-4 py-2 ring-1 ring-primary/20 focus:ring-2 focus:ring-primary/40 focus:outline-none text-base md:text-lg`}
+                    style={{
+                      transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                      transitionDelay: searchOpen ? '60ms' : '0ms',
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    className={`tap ${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} rounded-full px-4 py-2 bg-primary text-contrast hover:bg-primary/90 transition-colors shadow`}
+                    style={{
+                      transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                      transitionDelay: searchOpen ? '120ms' : '0ms',
+                    }}
+                  >
+                    Go
+                  </button>
+                </form>
+              </div>
+            </nav>
+          </div>
+        </div>
       </div>
+
+      {/* Mobile full-screen search overlay */}
+      {searchOpen && (
+        <div
+          className="fixed inset-0 z-[60] md:hidden pointer-events-auto bg-contrast/60 backdrop-blur-sm transition-opacity"
+          onClick={() => setSearchOpen(false)}
+          style={{padding: '8vh 6vw'}}
+        >
+          <div
+            className="relative mx-auto"
+            onClick={(e) => e.stopPropagation()}
+            style={{width: '88vw'}}
+          >
+            <form role="search" action="/search" method="get" className="flex items-center gap-[4vw] w-full">
+              <input
+                ref={searchInputRef}
+                name="q"
+                type="search"
+                placeholder="Search…"
+                className="flex-1 bg-contrast/80 text-primary placeholder:text-primary/60 rounded-full px-[4vw] py-[2.6vh] ring-1 ring-primary/25 focus:ring-2 focus:ring-primary/40 focus:outline-none text-[max(1rem,3.8vw)]"
+              />
+              <button
+                type="submit"
+                className="rounded-full px-[4vw] py-[2.2vh] bg-primary text-contrast hover:bg-primary/90 transition-colors shadow text-[max(1rem,3.6vw)]"
+              >
+                Go
+              </button>
+            </form>
+
+            <button
+              aria-label="Close search"
+              onClick={() => setSearchOpen(false)}
+              className="absolute -top-[5vh] right-0 text-primary"
+            >
+              <IconClose className="w-[7vw] h-[7vw]" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+// Deprecated: SearchButton merged into BottomBar for unified behavior

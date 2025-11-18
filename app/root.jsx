@@ -64,7 +64,14 @@ export const links = () => {
       rel: 'preconnect',
       href: 'https://shop.app',
     },
+    {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
+    {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {
+      rel: 'stylesheet',
+      href:
+        'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap',
+    },
   ];
 };
 
@@ -165,20 +172,30 @@ function Layout({children}) {
         <Meta />
         <Links />
       </head>
-      <body>
+  <body className="grain">
         {data ? (
-          <Analytics.Provider
-            cart={data.cart}
-            shop={data.shop}
-            consent={data.consent}
-          >
-            <PageLayout
-              key={`${locale.language}-${locale.country}`}
-              layout={data.layout}
+          // Only mount Analytics.Provider when consent.checkoutDomain is available.
+          // Some development environments won't set PUBLIC_CHECKOUT_DOMAIN which
+          // causes the provider to throw and break hydration on the client. When
+          // the env var is missing we skip the provider so the page can hydrate.
+          data.consent && data.consent.checkoutDomain ? (
+            <Analytics.Provider
+              cart={data.cart}
+              shop={data.shop}
+              consent={data.consent}
             >
+              <PageLayout
+                key={`${locale.language}-${locale.country}`}
+                layout={data.layout}
+              >
+                {children}
+              </PageLayout>
+            </Analytics.Provider>
+          ) : (
+            <PageLayout key={`${locale.language}-${locale.country}`} layout={data.layout}>
               {children}
             </PageLayout>
-          </Analytics.Provider>
+          )
         ) : (
           <PageLayout layout={undefined}>{children}</PageLayout>
         )}

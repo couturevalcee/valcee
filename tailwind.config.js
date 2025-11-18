@@ -46,8 +46,8 @@ export default {
         mobileGallery: 'calc(100vw - 3rem)',
       },
       fontFamily: {
-        sans: ['Helvetica Neue', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        serif: ['"IBMPlexSerif"', 'Palatino', 'ui-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        serif: ['Fraunces', 'Palatino', 'Georgia', 'ui-serif', 'serif'],
       },
       fontSize: {
         display: ['var(--font-size-display)', '1.1'],

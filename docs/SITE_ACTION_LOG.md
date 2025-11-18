@@ -15,3 +15,4 @@ Log:
 - 2025-10-17T18:50:00Z - Developer: Tested checkout API endpoint - successfully creating cart with product variant `gid://shopify/ProductVariant/47367932543190` and returning checkout URL.
 - 2025-10-17T18:52:00Z - Developer: Disabled demo checkout domain (`PUBLIC_CHECKOUT_DOMAIN`) in `.env` to prevent 401 errors from checkout.hydrogen.shop calls.
 - 2025-10-18T22:00:00Z - AI Assistant: Conducted comprehensive site-wide audit and exploration covering architecture, purpose, APIs, integrations, design systems, brand identity, strategic positioning, gaps analysis, and recommendations for Valcee Couture e-commerce platform.
+- 2025-10-27T14:54:00Z - Developer: Fixed the UI of the Collections landing page.
