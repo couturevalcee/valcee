@@ -1,4 +1,5 @@
 import {useParams, Form, Await, useRouteLoaderData, useLocation, useFetcher} from '@remix-run/react';
+import valceeLogo from '~/assets/valcee-logo.png';
 import useWindowScroll from 'react-use/esm/useWindowScroll';
 import {Disclosure, Transition} from '@headlessui/react';
 import {Suspense, useEffect, useMemo, useState, useRef} from 'react';
@@ -185,7 +186,7 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
         aria-label={title || 'Valcee Couture'}
       >
         <img
-          src="/images/valcee-logo.png"
+          src={valceeLogo}
           alt={title || 'Valcee'}
           className="h-12 md:h-16 lg:h-20 object-contain"
           loading="eager"
