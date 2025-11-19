@@ -1,4 +1,4 @@
-import {useRef, Suspense} from 'react';
+import {useRef, Suspense, useState} from 'react';
 import {Disclosure, Listbox} from '@headlessui/react';
 import {defer} from '@shopify/remix-oxygen';
 import {useLoaderData, Await} from '@remix-run/react';
@@ -20,7 +20,6 @@ import {Link} from '~/components/Link';
 import {Button} from '~/components/Button';
 import {AddToCartButton} from '~/components/AddToCartButton';
 import {Skeleton} from '~/components/Skeleton';
-import {ProductSwimlane} from '~/components/ProductSwimlane';
 import {ProductGallery} from '~/components/ProductGallery';
 import {IconCaret, IconCheck, IconClose} from '~/components/Icon';
 import {getExcerpt} from '~/lib/utils';
@@ -137,63 +136,33 @@ export default function Product() {
 
   return (
     <>
-      <Section className="px-0 md:px-8 lg:px-12">
-        <div className="grid items-start md:gap-6 lg:gap-20 md:grid-cols-2 lg:grid-cols-3">
-          <ProductGallery
-            media={media.nodes}
-            className="w-full lg:col-span-2"
-          />
-          <div className="sticky md:-mb-nav md:top-nav md:-translate-y-nav md:h-screen md:pt-nav hiddenScroll md:overflow-y-scroll">
-            <section className="flex flex-col w-full max-w-xl gap-8 p-6 md:mx-auto md:max-w-sm md:px-0">
-              <div className="grid gap-2">
-                <Heading as="h1" className="whitespace-normal">
-                  {title}
-                </Heading>
-                {vendor && (
-                  <Text className={'opacity-50 font-medium'}>{vendor}</Text>
-                )}
-              </div>
-              <ProductForm
-                productOptions={productOptions}
-                selectedVariant={selectedVariant}
-                storeDomain={storeDomain}
-              />
-              <div className="grid gap-4 py-4">
-                {descriptionHtml && (
-                  <ProductDetail
-                    title="Product Details"
-                    content={descriptionHtml}
-                  />
-                )}
-                {shippingPolicy?.body && (
-                  <ProductDetail
-                    title="Shipping"
-                    content={getExcerpt(shippingPolicy.body)}
-                    learnMore={`/policies/${shippingPolicy.handle}`}
-                  />
-                )}
-                {refundPolicy?.body && (
-                  <ProductDetail
-                    title="Returns"
-                    content={getExcerpt(refundPolicy.body)}
-                    learnMore={`/policies/${refundPolicy.handle}`}
-                  />
-                )}
-              </div>
-            </section>
+      <Section className="px-4 md:px-8 lg:px-12 max-w-screen-xl mx-auto">
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 md:items-start md:gap-10 lg:gap-16">
+          {/* Left: product imagery */}
+          <div className="md:col-span-2 flex flex-col gap-4">
+            <ProductGallery
+              media={media.nodes}
+              className="w-full"
+            />
+          </div>
+
+          {/* Right: details */}
+          <div className="md:col-span-1 flex flex-col gap-8 md:pt-4 sticky top-24 text-center items-center">
+            <div className="flex flex-col gap-2 items-center">
+              <Heading as="h1" className="whitespace-normal text-4xl font-bold tracking-tighter">
+                {title}
+              </Heading>
+            </div>
+
+            <ProductForm
+              productOptions={productOptions}
+              selectedVariant={selectedVariant}
+              storeDomain={storeDomain}
+              descriptionHtml={descriptionHtml}
+            />
           </div>
         </div>
       </Section>
-      <Suspense fallback={<Skeleton className="h-32" />}>
-        <Await
-          errorElement="There was a problem loading related products"
-          resolve={recommended}
-        >
-          {(products) => (
-            <ProductSwimlane title="Related Products" products={products} />
-          )}
-        </Await>
-      </Suspense>
       <Analytics.ProductView
         data={{
           products: [
@@ -218,183 +187,82 @@ export default function Product() {
  *   productOptions: MappedProductOptions[];
  *   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
  *   storeDomain: string;
+ *   descriptionHtml: string;
  * }}
  */
-export function ProductForm({productOptions, selectedVariant, storeDomain}) {
-  const closeRef = useRef(null);
-
+export function ProductForm({productOptions, selectedVariant, storeDomain, descriptionHtml}) {
   const isOutOfStock = !selectedVariant?.availableForSale;
-
-  const isOnSale =
-    selectedVariant?.price?.amount &&
-    selectedVariant?.compareAtPrice?.amount &&
-    selectedVariant?.price?.amount < selectedVariant?.compareAtPrice?.amount;
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  
+  // Check if we should hide options (single variant)
+  const hasVariants = productOptions.length > 1 || (productOptions[0]?.optionValues.length > 1);
 
   return (
-    <div className="grid gap-10">
-      <div className="grid gap-4">
-        {productOptions.map((option, optionIndex) => (
-          <div
-            key={option.name}
-            className="product-options flex flex-col flex-wrap mb-4 gap-y-2 last:mb-0"
-          >
-            <Heading as="legend" size="lead" className="min-w-[4rem]">
-              {option.name}
-            </Heading>
-            <div className="flex flex-wrap items-baseline gap-4">
-              {option.optionValues.length > 7 ? (
-                <div className="relative w-full">
-                  <Listbox>
-                    {({open}) => (
-                      <>
-                        <Listbox.Button
-                          ref={closeRef}
-                          className={clsx(
-                            'flex items-center justify-between w-full py-3 px-4 border border-primary',
-                            open
-                              ? 'rounded-b md:rounded-t md:rounded-b-none'
-                              : 'rounded',
-                          )}
-                        >
-                          <span>
-                            {
-                              selectedVariant?.selectedOptions[optionIndex]
-                                .value
-                            }
-                          </span>
-                          <IconCaret direction={open ? 'up' : 'down'} />
-                        </Listbox.Button>
-                        <Listbox.Options
-                          className={clsx(
-                            'border-primary bg-contrast absolute bottom-12 z-30 grid h-48 w-full overflow-y-scroll rounded-t border px-2 py-2 transition-[max-height] duration-150 sm:bottom-auto md:rounded-b md:rounded-t-none md:border-t-0 md:border-b',
-                            open ? 'max-h-48' : 'max-h-0',
-                          )}
-                        >
-                          {option.optionValues
-                            .filter((value) => value.available)
-                            .map(
-                              ({
-                                isDifferentProduct,
-                                name,
-                                variantUriQuery,
-                                handle,
-                                selected,
-                              }) => (
-                                <Listbox.Option
-                                  key={`option-${option.name}-${name}`}
-                                  value={name}
-                                >
-                                  <Link
-                                    {...(!isDifferentProduct
-                                      ? {rel: 'nofollow'}
-                                      : {})}
-                                    to={`/products/${handle}?${variantUriQuery}`}
-                                    preventScrollReset
-                                    className={clsx(
-                                      'text-primary w-full p-2 transition rounded flex justify-start items-center text-left cursor-pointer',
-                                      selected && 'bg-primary/10',
-                                    )}
-                                    onClick={() => {
-                                      if (!closeRef?.current) return;
-                                      closeRef.current.click();
-                                    }}
-                                  >
-                                    {name}
-                                    {selected && (
-                                      <span className="ml-2">
-                                        <IconCheck />
-                                      </span>
-                                    )}
-                                  </Link>
-                                </Listbox.Option>
-                              ),
-                            )}
-                        </Listbox.Options>
-                      </>
-                    )}
-                  </Listbox>
-                </div>
-              ) : (
-                option.optionValues.map(
-                  ({
-                    isDifferentProduct,
-                    name,
-                    variantUriQuery,
-                    handle,
-                    selected,
-                    available,
-                    swatch,
-                  }) => (
-                    <Link
-                      key={option.name + name}
-                      {...(!isDifferentProduct ? {rel: 'nofollow'} : {})}
-                      to={`/products/${handle}?${variantUriQuery}`}
-                      preventScrollReset
-                      prefetch="intent"
-                      replace
-                      className={clsx(
-                        'leading-none py-1 border-b-[1.5px] cursor-pointer transition-all duration-200',
-                        selected ? 'border-primary/50' : 'border-primary/0',
-                        available ? 'opacity-100' : 'opacity-50',
-                      )}
-                    >
-                      <ProductOptionSwatch swatch={swatch} name={name} />
-                    </Link>
-                  ),
-                )
-              )}
-            </div>
-          </div>
-        ))}
-        {selectedVariant && (
-          <div className="grid items-stretch gap-4">
-            {isOutOfStock ? (
-              <Button variant="secondary" disabled>
-                <Text>Sold out</Text>
-              </Button>
-            ) : (
-              <AddToCartButton
-                lines={[
-                  {
-                    merchandiseId: selectedVariant.id,
-                    quantity: 1,
-                  },
-                ]}
-                variant="primary"
-                data-test="add-to-cart"
-              >
-                <Text
-                  as="span"
-                  className="flex items-center justify-center gap-2"
-                >
-                  <span>Add to Cart</span> <span>·</span>{' '}
-                  <Money
-                    withoutTrailingZeros
-                    data={selectedVariant?.price}
-                    as="span"
-                    data-test="price"
-                  />
-                  {isOnSale && (
-                    <Money
-                      withoutTrailingZeros
-                      data={selectedVariant?.compareAtPrice}
-                      as="span"
-                      className="opacity-50 strike"
-                    />
-                  )}
-                </Text>
-              </AddToCartButton>
-            )}
-            {!isOutOfStock && (
-              <ShopPayButton
-                width="100%"
-                variantIds={[selectedVariant?.id]}
-                storeDomain={storeDomain}
-              />
-            )}
-          </div>
-        )}
+    <div className="grid gap-8 place-items-center">
+      <div className="text-2xl font-medium">
+        {selectedVariant?.price && <Money data={selectedVariant?.price} />}
       </div>
+
+      {descriptionHtml && (
+        <div className="flex flex-col items-center gap-2">
+          <button 
+            onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+            className="text-sm uppercase tracking-widest border-b border-primary/50 hover:border-primary transition-colors pb-0.5"
+          >
+            {isDescriptionExpanded ? 'Close' : 'Read More'}
+          </button>
+          
+          <div 
+            className={`prose dark:prose-invert text-sm leading-relaxed opacity-80 overflow-hidden transition-all duration-500 ease-in-out ${isDescriptionExpanded ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
+          >
+            <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+          </div>
+        </div>
+      )}
+
+      {hasVariants && (
+        <div className="grid gap-4 justify-items-center">
+          {productOptions.map((option) => (
+            <div key={option.name} className="flex flex-col gap-2 items-center">
+              <h3 className="text-sm opacity-60">{option.name}</h3>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {option.optionValues.map((value) => (
+                  <Link
+                    key={value.name}
+                    to={value.variantUriQuery ? `?${value.variantUriQuery}` : '#'}
+                    preventScrollReset
+                    className={clsx(
+                      'text-sm px-3 py-1 border transition-all',
+                      value.selected 
+                        ? 'border-primary opacity-100' 
+                        : 'border-transparent opacity-50 hover:opacity-100'
+                    )}
+                  >
+                    {value.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <AddToCartButton
+        disabled={isOutOfStock}
+        lines={
+          selectedVariant
+            ? [
+                {
+                  merchandiseId: selectedVariant.id,
+                  quantity: 1,
+                },
+              ]
+            : []
+        }
+        className="text-center text-xl font-bold hover:opacity-70 transition-opacity w-max bg-transparent border-none p-0 text-primary"
+      >
+        {isOutOfStock ? 'Sold Out' : 'Get'}
+      </AddToCartButton>
     </div>
   );
 }

@@ -1,17 +1,17 @@
 import {defer} from '@shopify/remix-oxygen';
 import {Await, Form, useLoaderData} from '@remix-run/react';
-import {Suspense} from 'react';
+import {Suspense, useState} from 'react';
 import {
   Pagination,
   getPaginationVariables,
   Analytics,
   getSeoMeta,
+  Image,
 } from '@shopify/hydrogen';
 
 import {Heading, PageHeader, Section, Text} from '~/components/Text';
 import {Input} from '~/components/Input';
-import {Grid} from '~/components/Grid';
-import {ProductCard} from '~/components/ProductCard';
+import {Link} from '~/components/Link';
 import {ProductSwimlane} from '~/components/ProductSwimlane';
 import {FeaturedCollections} from '~/components/FeaturedCollections';
 import {PRODUCT_CARD_FRAGMENT} from '~/data/fragments';
@@ -78,53 +78,106 @@ export default function Search() {
   /** @type {LoaderReturnData} */
   const {searchTerm, products, noResultRecommendations} = useLoaderData();
   const noResults = products?.nodes?.length === 0;
+  const [zoomLevel, setZoomLevel] = useState(4);
 
   return (
-    <>
-      <PageHeader>
-        <Heading as="h1" size="copy">
-          Search
+    <div className="min-h-screen pb-12 px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-8 pt-24">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-primary/5 pb-4">
+        <Heading as="h1" size="lead" className="uppercase tracking-widest">
+          {searchTerm ? `Results for "${searchTerm}"` : 'Search'}
         </Heading>
-        <Form method="get" className="relative flex w-full text-heading">
-          <Input
-            defaultValue={searchTerm}
-            name="q"
-            placeholder="Search…"
-            type="search"
-            variant="search"
-          />
-          <button className="absolute right-0 py-2" type="submit">
-            Go
-          </button>
-        </Form>
-      </PageHeader>
+        
+        {!noResults && (
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] uppercase tracking-widest opacity-50">View</span>
+            <input
+              type="range"
+              min="1"
+              max="8"
+              step="1"
+              value={zoomLevel}
+              onChange={(e) => setZoomLevel(parseInt(e.target.value))}
+              className="w-32 h-1 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary"
+              aria-label="Zoom level"
+            />
+          </div>
+        )}
+      </div>
+
+      <Form method="get" className="relative flex w-full max-w-md mx-auto text-heading mb-8">
+        <Input
+          defaultValue={searchTerm}
+          name="q"
+          placeholder="Search…"
+          type="search"
+          variant="search"
+          className="text-center uppercase tracking-widest"
+        />
+        <button className="absolute right-0 py-2 px-4" type="submit">
+          GO
+        </button>
+      </Form>
+
       {!searchTerm || noResults ? (
         <NoResults
           noResults={noResults}
           recommendations={noResultRecommendations}
         />
       ) : (
-        <Section>
+        <Section padding="none">
           <Pagination connection={products}>
             {({nodes, isLoading, NextLink, PreviousLink}) => {
-              const itemsMarkup = nodes.map((product, i) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  loading={getImageLoadingPriority(i)}
-                />
-              ));
-
               return (
                 <>
-                  <div className="flex items-center justify-center mt-6">
-                    <PreviousLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary w-full">
+                  <div 
+                    className="grid gap-x-4 gap-y-12 transition-all duration-500 ease-in-out"
+                    style={{
+                      gridTemplateColumns: `repeat(${zoomLevel}, minmax(0, 1fr))`
+                    }}
+                  >
+                    {nodes.map((product) => {
+                      // Handle different data structures (fragment vs direct query)
+                      const image = product.featuredImage || product.variants?.nodes?.[0]?.image;
+                      const price = product.priceRange?.minVariantPrice || product.variants?.nodes?.[0]?.price;
+                      
+                      return (
+                        <Link
+                          key={product.id}
+                          to={`/products/${product.handle}`}
+                          prefetch="intent"
+                          className={`group relative flex flex-col gap-4 ${zoomLevel === 1 ? 'justify-start' : ''}`}
+                        >
+                          <div className={`relative overflow-hidden w-full ${zoomLevel === 1 ? 'aspect-[3/4] max-h-[70vh]' : 'aspect-[4/5]'}`}>
+                            {image && (
+                              <Image
+                                data={image}
+                                aspectRatio={zoomLevel === 1 ? "3/4" : "4/5"}
+                                sizes="(min-width: 45em) 20vw, 50vw"
+                                className="object-contain w-full h-full transition-transform duration-500 group-hover:scale-105 img-cutout drop-shadow-xl"
+                              />
+                            )}
+                          </div>
+                          
+                          <div className={`flex flex-col items-center text-center gap-1 transition-opacity duration-300 ${zoomLevel > 4 ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+                            <span className="text-primary text-xs uppercase tracking-widest font-medium">
+                              {product.title}
+                            </span>
+                            {zoomLevel <= 2 && price && (
+                              <span className="text-primary/60 text-[10px] tracking-wider">
+                                {price.amount} {price.currencyCode}
+                              </span>
+                            )}
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  
+                  <div className="flex items-center justify-center mt-12 gap-4">
+                    <PreviousLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary hover:bg-primary/5 transition-colors">
                       {isLoading ? 'Loading...' : 'Previous'}
                     </PreviousLink>
-                  </div>
-                  <Grid data-test="product-grid">{itemsMarkup}</Grid>
-                  <div className="flex items-center justify-center mt-6">
-                    <NextLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary w-full">
+                    <NextLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary hover:bg-primary/5 transition-colors">
                       {isLoading ? 'Loading...' : 'Next'}
                     </NextLink>
                   </div>
@@ -135,7 +188,7 @@ export default function Search() {
         </Section>
       )}
       <Analytics.SearchView data={{searchTerm, searchResults: products}} />
-    </>
+    </div>
   );
 }
 
@@ -209,6 +262,21 @@ const SEARCH_QUERY = `#graphql
       query: $searchTerm
     ) {
       nodes {
+        id
+        title
+        handle
+        featuredImage {
+          url
+          altText
+          width
+          height
+        }
+        priceRange {
+          minVariantPrice {
+            amount
+            currencyCode
+          }
+        }
         ...ProductCard
       }
       pageInfo {

@@ -104,13 +104,13 @@ function CartDiscounts({discountCodes}) {
           )}
         >
           <input
-            className={getInputStyleClasses()}
+            className={clsx(getInputStyleClasses(), 'text-sm')}
             type="text"
             name="discountCode"
             placeholder="Discount code"
           />
-          <button className="flex justify-end font-medium whitespace-nowrap">
-            Apply Discount
+          <button className="flex justify-end font-medium whitespace-nowrap text-sm">
+            Apply
           </button>
         </div>
       </UpdateDiscountForm>
@@ -181,7 +181,7 @@ function CartCheckoutActions({checkoutUrl, cart}) {
       <div className="flex flex-col mt-2">
         <a href={checkoutUrl} target="_self">
           <Button as="span" width="full">
-            Continue to Checkout
+            Continue
           </Button>
         </a>
       </div>
@@ -230,7 +230,7 @@ function CartCheckoutActions({checkoutUrl, cart}) {
     <div className="flex flex-col mt-2">
       <button onClick={handleCreateCheckout} className="button-primary">
         <Button as="span" width="full">
-          Continue to Checkout
+          Continue
         </Button>
       </button>
     </div>
@@ -298,9 +298,8 @@ function CartLineItem({line}) {
         {merchandise.image && (
           <Image
             width={110}
-            height={110}
             data={merchandise.image}
-            className="object-cover object-center w-24 h-24 border rounded md:w-28 md:h-28"
+            className="object-contain object-left w-24 h-auto rounded md:w-28"
             alt={merchandise.title}
           />
         )}
@@ -319,11 +318,13 @@ function CartLineItem({line}) {
           </Heading>
 
           <div className="grid pb-2">
-            {(merchandise?.selectedOptions || []).map((option) => (
-              <Text color="subtle" key={option.name}>
-                {option.name}: {option.value}
-              </Text>
-            ))}
+            {(merchandise?.selectedOptions || [])
+              .filter((option) => option.value !== 'Default Title')
+              .map((option) => (
+                <Text color="subtle" key={option.name}>
+                  {option.name}: {option.value}
+                </Text>
+              ))}
           </div>
 
           <div className="flex items-center gap-2">

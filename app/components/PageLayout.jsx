@@ -1,4 +1,4 @@
-import {useParams, Form, Await, useRouteLoaderData, useLocation} from '@remix-run/react';
+import {useParams, Form, Await, useRouteLoaderData, useLocation, useFetcher} from '@remix-run/react';
 import useWindowScroll from 'react-use/esm/useWindowScroll';
 import {Disclosure, Transition} from '@headlessui/react';
 import {Suspense, useEffect, useMemo, useState, useRef} from 'react';
@@ -31,14 +31,41 @@ export function PageLayout({children, layout}) {
   const isHome = useIsHomePath();
   const location = useLocation();
   const isManageRoute = (location?.pathname || '').toLowerCase().includes('manage');
+  const isHomeRoute = isHome;
+  useEffect(() => {
+    const mainContent = document.getElementById('mainContent');
+    if (isManageRoute) {
+      window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+      return;
+    }
+    if (isHomeRoute) {
+      window.scrollTo({top: 0, left: 0, behavior: 'auto'});
+      return;
+    }
+    if (mainContent) {
+      mainContent.scrollTo({top: 0, left: 0, behavior: 'auto'});
+    }
+  }, [location.pathname, location.search, isHomeRoute, isManageRoute]);
   const mainStyle = isManageRoute
     ? {
         // Standard document scroll for manage pages
         paddingTop: 'var(--height-nav)',
         paddingBottom: 'calc(16vh + env(safe-area-inset-bottom, 0px))',
       }
+    : isHomeRoute
+    ? {
+        // Home: no internal scroll window, just sit between header and bottom bar
+        paddingTop: 'var(--height-nav)',
+        paddingBottom: 0,
+        overflow: 'hidden',
+        height: '100vh',
+        position: 'fixed',
+        width: '100%',
+        top: 0,
+        left: 0,
+      }
     : {
-        // Bounded scroll window between header and bottom controls
+        // Other pages: bounded scroll window between header and bottom controls
         position: 'fixed',
         top: 'var(--height-nav)',
         left: 0,
@@ -67,22 +94,8 @@ export function PageLayout({children, layout}) {
             style={mainStyle}
           >
           <div className="relative h-full">
-            {/* Always-on top soft edge (fixed to the top boundary of the scroll window) */}
-            <div
-              aria-hidden
-              className="pointer-events-none fixed left-0 right-0"
-              style={{top: 'var(--height-nav)', height: '3.5vh', zIndex: 45}}
-            >
-              <div className="w-full h-full bg-gradient-to-b from-contrast to-transparent" />
-            </div>
-
-            <div className="relative">
+            <div className="relative h-full">
               {children}
-            </div>
-
-            {/* Bottom soft edge (inside scroll area, above bottom controls) */}
-            <div aria-hidden className="pointer-events-none sticky bottom-0 z-10" style={{height: '4.5vh'}}>
-              <div className="w-full h-full bg-gradient-to-t from-contrast to-transparent" />
             </div>
           </div>
         </main>
@@ -217,7 +230,7 @@ function CartDrawer({isOpen, onClose}) {
 export function MenuDrawer({isOpen, onClose, menu}) {
   return (
     <Drawer open={isOpen} onClose={onClose} openFrom="left" heading="Menu">
-      <div className="grid">
+      <div className="h-full">
         <MenuMobileNav menu={menu} onClose={onClose} />
       </div>
     </Drawer>
@@ -231,46 +244,47 @@ export function MenuDrawer({isOpen, onClose, menu}) {
  * }}
  */
 function MenuMobileNav({menu, onClose}) {
+  const rootData = useRouteLoaderData('root');
+  const isLoggedIn = rootData?.isLoggedIn;
+
   const staticItems = [
+    {id: 'collections', title: 'Collections', to: '/collections'},
     {id: 'gallery', title: 'Gallery', to: '/gallery'},
-    {id: 'archive', title: 'Archive', to: '/collections'},
-    {id: 'editorial', title: 'Editorial', to: '/editorial'},
-    {id: 'connect', title: 'Connect', to: '/connect'},
     {id: 'account', title: 'Account', to: '/account'},
   ];
+
   return (
-    <nav className="grid gap-6 p-6 sm:gap-8 sm:px-12 sm:py-8">
-      {staticItems.map((item) => (
-        <span key={item.id} className="block">
-          <Link to={item.to} onClick={onClose}>
-            <Heading as="span" size="display" className="leading-none">
-              {item.title}
-            </Heading>
-          </Link>
-        </span>
-      ))}
-      {/* Divider */}
-      <div className="h-px bg-primary/20 my-2" />
-      {/* Fallback to Shopify menu items if configured */}
-      {(menu?.items || []).map((item) => (
-        <span key={item.id} className="block">
-          <Link
-            to={item.to}
-            target={item.target}
-            onClick={onClose}
-            className={({isActive}) => (isActive ? 'pb-1 border-b -mb-px' : 'pb-1')}
-          >
-            <Text as="span" size="copy">
-              {item.title}
-            </Text>
-          </Link>
-        </span>
-      ))}
-      <span>
-        <Link to="/account/logout" onClick={onClose}>
-          <Text as="span" size="fine">Log out</Text>
+    <nav className="flex flex-col justify-between h-full p-6 pb-4 sm:px-12 sm:py-8">
+      {/* Main Links */}
+      <div className="flex flex-col items-center justify-center gap-12 flex-grow">
+        {staticItems.map((item) => (
+          <span key={item.id} className="block">
+            <Link to={item.to} onClick={onClose}>
+              <span className="font-serif italic text-4xl md:text-5xl leading-none hover:opacity-70 transition-opacity">
+                {item.title}
+              </span>
+            </Link>
+          </span>
+        ))}
+      </div>
+
+      {/* Bottom Links */}
+      <div className="flex flex-col items-center gap-4">
+        <Link to="/" onClick={onClose} className="text-sm uppercase tracking-widest hover:opacity-70">
+          Home
         </Link>
-      </span>
+        <Link to="/pages/contact" onClick={onClose} className="text-sm uppercase tracking-widest hover:opacity-70">
+          Contact
+        </Link>
+        
+        <Link
+          to="/account/login"
+          onClick={onClose}
+          className="text-sm uppercase tracking-widest hover:opacity-70 mt-4"
+        >
+          Log in
+        </Link>
+      </div>
     </nav>
   );
 }
@@ -406,6 +420,7 @@ function BottomBar() {
 
   const [helpOpen, setHelpOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const fetcher = useFetcher();
 
   const containerRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -431,12 +446,23 @@ function BottomBar() {
     }
   }, [searchOpen]);
 
+  const handleSearchChange = (e) => {
+    const term = e.target.value;
+    if (term) {
+      fetcher.load(`/api/predictive-search?q=${term}&limit=5`);
+    }
+  };
+
   // staged help links so we can animate with staggered delays
   const helpLinks = [
-    {to: '/policies/terms-of-service', label: 'Terms of Service'},
+    {to: '/contact', label: 'Contact'},
+    {to: '/terms-of-service', label: 'Terms of Service'},
+    {to: '/shipping-and-returns', label: 'Shipping & Returns'},
     {to: '/policies/privacy-policy', label: 'Privacy Policy'},
-    {to: '/policies/shipping-policy', label: 'Shipping & Returns'},
   ];
+
+  const searchResults = fetcher.data?.items || [];
+  const searchTerm = searchInputRef.current?.value || '';
 
   return (
     <div className="fixed inset-x-0 pointer-events-none z-50" style={{bottom: '2.5vh'}}>
@@ -527,7 +553,7 @@ function BottomBar() {
           </button>
 
           {/* Desktop/tablet inline tray (hidden on mobile) */}
-          <div id="search-menu" role="menu" aria-hidden={!searchOpen} className="hidden md:block" style={{overflow: 'hidden'}}>
+          <div id="search-menu" role="menu" aria-hidden={!searchOpen} className="hidden md:block" style={{overflow: 'visible'}}>
             <nav
               className={`origin-right transform-gpu ${
                 searchOpen
@@ -541,13 +567,14 @@ function BottomBar() {
               }}
             >
               <div
-                className={`flex flex-wrap items-center gap-x-3 gap-y-2 bg-contrast/85 backdrop-blur-md text-primary rounded-md ring-1 ring-primary/10 ${
+                className={`flex flex-col gap-2 bg-contrast/85 backdrop-blur-md text-primary rounded-md ring-1 ring-primary/10 ${
                   searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.4vh]'
                 }`}
                 style={{
                   padding: '1.2vh 2.6vw',
                   transition:
                     'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                  minWidth: '300px'
                 }}
               >
                 <form role="search" action="/search" method="get" className="flex items-center gap-2 w-full">
@@ -556,6 +583,7 @@ function BottomBar() {
                     name="q"
                     type="search"
                     placeholder="Search…"
+                    onChange={handleSearchChange}
                     className={`${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} w-[70vw] md:w-[42vw] max-w-[90vw] md:max-w-[50vw] text-primary placeholder:text-primary/60 bg-contrast/30 rounded-full px-4 py-2 ring-1 ring-primary/20 focus:ring-2 focus:ring-primary/40 focus:outline-none text-base md:text-lg`}
                     style={{
                       transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
@@ -573,6 +601,13 @@ function BottomBar() {
                     Go
                   </button>
                 </form>
+                
+                {/* Desktop Results */}
+                {searchTerm && (
+                  <div className="w-full border-t border-primary/10 pt-2 mt-2">
+                    <PredictiveResults items={searchResults} term={searchTerm} />
+                  </div>
+                )}
               </div>
             </nav>
           </div>
@@ -587,7 +622,7 @@ function BottomBar() {
           style={{padding: '8vh 6vw'}}
         >
           <div
-            className="relative mx-auto"
+            className="relative mx-auto flex flex-col gap-4"
             onClick={(e) => e.stopPropagation()}
             style={{width: '88vw'}}
           >
@@ -597,6 +632,7 @@ function BottomBar() {
                 name="q"
                 type="search"
                 placeholder="Search…"
+                onChange={handleSearchChange}
                 className="flex-1 bg-contrast/80 text-primary placeholder:text-primary/60 rounded-full px-[4vw] py-[2.6vh] ring-1 ring-primary/25 focus:ring-2 focus:ring-primary/40 focus:outline-none text-[max(1rem,3.8vw)]"
               />
               <button
@@ -606,6 +642,13 @@ function BottomBar() {
                 Go
               </button>
             </form>
+
+            {/* Mobile Results */}
+            {searchTerm && (
+              <div className="bg-contrast/90 backdrop-blur-md rounded-lg p-4 shadow-lg max-h-[60vh] overflow-y-auto">
+                <PredictiveResults items={searchResults} term={searchTerm} />
+              </div>
+            )}
 
             <button
               aria-label="Close search"
@@ -617,6 +660,42 @@ function BottomBar() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function PredictiveResults({items, term}) {
+  if (!term) return null;
+  if (items.length === 0) {
+    return (
+      <div className="p-4 text-center text-primary/60 uppercase tracking-widest text-xs">
+        Not found
+      </div>
+    );
+  }
+  return (
+    <div className="grid gap-2">
+      {items.map((product) => (
+        <Link
+          key={product.id}
+          to={`/products/${product.handle}`}
+          className="flex items-center gap-4 p-2 hover:bg-primary/5 rounded transition-colors"
+        >
+          {product.featuredImage && (
+            <img
+              src={product.featuredImage.url}
+              alt={product.featuredImage.altText}
+              className="w-12 h-12 object-contain rounded-sm bg-white"
+            />
+          )}
+          <div className="flex flex-col text-left">
+            <span className="text-sm font-medium uppercase tracking-wide">{product.title}</span>
+            <span className="text-xs text-primary/60">
+              {product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}
+            </span>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }

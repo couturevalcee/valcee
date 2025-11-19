@@ -11,7 +11,11 @@ export function OrderCard({order}) {
 
   const [legacyOrderId, key] = order.id.split('/').pop().split('?');
   const lineItems = flattenConnection(order?.lineItems);
-  const fulfillmentStatus = flattenConnection(order?.fulfillments)[0]?.status;
+  const hasLineItems = lineItems.length > 0;
+  const primaryItem = hasLineItems ? lineItems[0] : null;
+  const firstFulfillment = flattenConnection(order?.fulfillments)[0];
+  const fulfillmentStatus = firstFulfillment?.status ?? order.fulfillmentStatus;
+  const trackingInfo = firstFulfillment?.trackingInfo?.[0];
   const url = key
     ? `/account/orders/${legacyOrderId}?${key}`
     : `/account/orders/${legacyOrderId}`;
@@ -23,26 +27,28 @@ export function OrderCard({order}) {
         to={url}
         prefetch="intent"
       >
-        {lineItems[0].image && (
+        {primaryItem?.image && (
           <div className="card-image aspect-square bg-primary/5">
             <Image
               width={168}
               height={168}
               className="w-full fadeIn cover"
-              alt={lineItems[0].image?.altText ?? 'Order image'}
-              src={lineItems[0].image.url}
+              alt={primaryItem.image?.altText ?? 'Order image'}
+              src={primaryItem.image.url}
             />
           </div>
         )}
         <div
           className={`flex-col justify-center text-left ${
-            !lineItems[0].image && 'md:col-span-2'
+            !primaryItem?.image && 'md:col-span-2'
           }`}
         >
           <Heading as="h3" format size="copy">
-            {lineItems.length > 1
-              ? `${lineItems[0].title} +${lineItems.length - 1} more`
-              : lineItems[0].title}
+            {hasLineItems
+              ? lineItems.length > 1
+                ? `${primaryItem.title} +${lineItems.length - 1} more`
+                : primaryItem.title
+              : 'Order details'}
           </Heading>
           <dl className="grid grid-gap-1">
             <dt className="sr-only">Order ID</dt>
@@ -73,19 +79,36 @@ export function OrderCard({order}) {
                 </dd>
               </>
             )}
+            {trackingInfo?.number && (
+              <dd className="mt-2 text-xs text-gray-500">
+                {trackingInfo.company ?? 'Carrier'} • #{trackingInfo.number}
+              </dd>
+            )}
           </dl>
         </div>
       </Link>
-      <div className="self-end border-t">
+      <div className="flex border-t divide-x">
         <Link
-          className="block w-full p-2 text-center"
+          className="flex-1 block p-2 text-center"
           to={url}
           prefetch="intent"
         >
           <Text color="subtle" className="ml-3">
-            View Details
+            View details
           </Text>
         </Link>
+        {trackingInfo?.url && (
+          <a
+            className="flex-1 block p-2 text-center text-sm text-primary"
+            href={trackingInfo.url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Text color="primary" className="ml-3">
+              Track package
+            </Text>
+          </a>
+        )}
       </div>
     </li>
   );

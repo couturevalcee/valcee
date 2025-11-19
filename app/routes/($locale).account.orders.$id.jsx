@@ -58,6 +58,7 @@ export async function loader({request, context, params}) {
 
     const fulfillmentStatus =
       fulfillments.length > 0 ? fulfillments[0].status : 'OPEN';
+    const trackingInfo = fulfillments.flatMap((fulfillment) => fulfillment.trackingInfo ?? []);
 
     return json({
       order,
@@ -65,6 +66,7 @@ export async function loader({request, context, params}) {
       discountValue,
       discountPercentage,
       fulfillmentStatus,
+      trackingInfo,
     });
   } catch (error) {
     throw new Response(error instanceof Error ? error.message : undefined, {
@@ -81,7 +83,12 @@ export default function OrderRoute() {
     discountValue,
     discountPercentage,
     fulfillmentStatus,
+    trackingInfo,
   } = useLoaderData();
+  const hasTracking = trackingInfo?.length > 0;
+  const primaryTracking = hasTracking ? trackingInfo[0] : null;
+  const trackingLabel = primaryTracking?.company || 'Carrier';
+
   return (
     <div>
       <PageHeader heading="Order detail">
@@ -305,6 +312,40 @@ export default function OrderRoute() {
                   )}
                 >
                   <Text size="fine">{statusMessage(fulfillmentStatus)}</Text>
+                </div>
+              )}
+              {hasTracking && (
+                <div className="mt-8">
+                  <Heading size="copy" className="font-semibold" as="h3">
+                    Tracking
+                  </Heading>
+                  <dl className="mt-4 space-y-3">
+                    <div>
+                      <dt className="text-xs uppercase tracking-wide text-gray-500">
+                        {trackingLabel}
+                      </dt>
+                      <dd className="text-sm font-medium text-gray-900">
+                        {primaryTracking?.number ?? 'Available soon'}
+                      </dd>
+                    </div>
+                    {primaryTracking?.url && (
+                      <div>
+                        <dt className="text-xs uppercase tracking-wide text-gray-500">
+                          Status page
+                        </dt>
+                        <dd>
+                          <a
+                            className="text-primary underline text-sm"
+                            href={primaryTracking.url}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            Track shipment
+                          </a>
+                        </dd>
+                      </div>
+                    )}
+                  </dl>
                 </div>
               )}
             </div>

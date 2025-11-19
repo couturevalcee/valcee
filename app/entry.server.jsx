@@ -30,6 +30,26 @@ export default async function handleRequest(
       'https://www.googletagmanager.com',
       ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:*'] : []),
     ],
+    styleSrc: [
+      'self',
+      'unsafe-inline',
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      'https://fonts.googleapis.com',
+      ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:*'] : []),
+    ],
+    fontSrc: [
+      'self',
+      'https://fonts.gstatic.com',
+      'https://cdn.shopify.com',
+    ],
+    imgSrc: [
+      'self',
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      'data:',
+      ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:*'] : []),
+    ],
   });
 
   const body = await renderToReadableStream(

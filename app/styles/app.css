@@ -243,6 +243,11 @@ shop-pay-button {
     }
   }
 
+  .snap-y-mandatory {
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+  }
+
   .text-accent {
     color: rgb(var(--color-accent));
   }

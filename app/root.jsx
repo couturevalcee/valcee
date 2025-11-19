@@ -168,11 +168,11 @@ function Layout({children}) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <meta name="msvalidate.01" content="A352E6A0AF9A652267361BBB572B8468" />
-        <link rel="stylesheet" href={styles}></link>
+        <link rel="stylesheet" href={styles} />
         <Meta />
         <Links />
       </head>
-  <body className="grain">
+      <body className="grain">
         {data ? (
           // Only mount Analytics.Provider when consent.checkoutDomain is available.
           // Some development environments won't set PUBLIC_CHECKOUT_DOMAIN which

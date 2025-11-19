@@ -2,44 +2,50 @@ import {defer} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {getSeoMeta} from '@shopify/hydrogen';
 import {Link} from '~/components/Link';
-import {Heading} from '~/components/Text';
-import {useEffect} from 'react';
+import {Heading, Text} from '~/components/Text';
 import {routeHeaders} from '~/data/cache';
 
 export const headers = routeHeaders;
 
-const LANDING_COLLECTIONS_QUERY = `#graphql
-  query LandingCollections(
-    $h1: String
-    $h2: String
-    $h3: String
-    $h4: String
+const FEATURED_PRODUCT_QUERY = `#graphql
+  query FeaturedProduct(
     $country: CountryCode
     $language: LanguageCode
   ) @inContext(country: $country, language: $language) {
-    c1: collection(handle: $h1) {
-      id
-      handle
-      title
-      image { url altText width height }
-    }
-    c2: collection(handle: $h2) {
-      id
-      handle
-      title
-      image { url altText width height }
-    }
-    c3: collection(handle: $h3) {
-      id
-      handle
-      title
-      image { url altText width height }
-    }
-    c4: collection(handle: $h4) {
-      id
-      handle
-      title
-      image { url altText width height }
+    products(first: 1, query: "tag:featured") {
+      edges {
+        node {
+          handle
+          title
+          description
+          featuredImage {
+            url
+            altText
+          }
+          media(first: 4) {
+            edges {
+              node {
+                __typename
+                ... on Video {
+                  previewImage {
+                    url
+                  }
+                  sources {
+                    url
+                    mimeType
+                  }
+                }
+              }
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
     }
   }
 `;
@@ -57,36 +63,25 @@ export async function loader(args) {
   ) {
     throw new Response(null, {status: 404});
   }
-
-  const handles = ['occasional', 'active', 'casual', 'lounge'];
-
-  let data = null;
+  let featuredProduct = null;
   try {
-    data = await context.storefront.query(LANDING_COLLECTIONS_QUERY, {
+    const data = await context.storefront.query(FEATURED_PRODUCT_QUERY, {
       variables: {
-        h1: handles[0],
-        h2: handles[1],
-        h3: handles[2],
-        h4: handles[3],
         country,
         language,
       },
     });
+    const edge = data?.products?.edges?.[0];
+    featuredProduct = edge?.node || null;
   } catch (e) {
-    console.error('Failed to load landing collections', e);
+    console.error('Failed to load featured product for home', e);
   }
 
-  const collections = [data?.c1, data?.c2, data?.c3, data?.c4]
-    .map((c, i) =>
-      c ? c : {id: `placeholder-${i}`, handle: handles[i], title: handles[i]},
-    )
-    .filter(Boolean);
-
   return defer({
-    collections,
+    featuredProduct,
     seo: {
       title: 'Valcee Couture',
-      description: 'Collections',
+      description: 'Featured piece',
       url: request.url,
     },
   });
@@ -95,64 +90,88 @@ export async function loader(args) {
 export const meta = ({matches}) => getSeoMeta(...matches.map((m) => m.data.seo));
 
 export default function Homepage() {
-  const {collections} = useLoaderData();
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-    .collection-image { width: 40vw; }
-    @media (min-width: 640px) { /* sm */
-      .collection-image { width: 28vw; }
-    }
-    @media (min-width: 768px) { /* md */
-      .collection-image { width: 18vw; }
-    }
-    @media (min-width: 1024px) { /* lg */
-      .collection-image { width: 12vw; }
-    }
-    `;
-    document.head.appendChild(style);
-    return () => style.remove();
-  }, []);
+  const {featuredProduct} = useLoaderData();
+  const imageMedia = featuredProduct?.featuredImage || null;
+
   return (
-    <main className="bg-contrast text-primary overflow-x-hidden overscroll-none">
-      {/* Center collections; respect header height to avoid recoil and ensure true centering */}
-      <section style={{minHeight: 'calc(100vh - var(--height-nav, 0px))', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6vh 4vw'}}>
-        <div style={{width: '100%', maxWidth: '92vw', marginLeft: 'auto', marginRight: 'auto'}}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 place-items-center justify-center transition-transform duration-200 ease-out">
-            {collections.map((c) => (
-              <Link key={c.id} to={`/collections/${c.handle}`} prefetch="intent" className="fadeIn">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="aspect-[3/4] rounded-sm overflow-hidden flex items-center justify-center transition-transform duration-300 ease-out will-change-transform hover:scale-105 blend-isolate bg-contrast collection-image" >
-                    {c?.image?.url ? (
-                      <img
-                        src={c.image.url}
-                        alt={c.image.altText || c.title}
-                        className="img-cutout w-full h-full object-contain opacity-95"
-                        loading="eager"
-                      />
-                    ) : (
-                      <img
-                        src={`/images/collections/${c.handle}.png`}
-                        alt={c.title}
-                        className="img-cutout w-full h-full object-contain opacity-95"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                        }}
-                      />
-                    )}
-                  </div>
-                  <Heading as="h2" size="lead" className="capitalize tracking-wide">
-                    {c.title}
-                  </Heading>
-                </div>
-              </Link>
-            ))}
+    <main className="relative h-[calc(100vh-var(--height-nav))] bg-contrast text-primary overflow-hidden">
+      {/* Immersive background layer */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <video
+          className="w-full h-full object-cover scale-105 opacity-90"
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={imageMedia?.url}
+        >
+          <source
+            src="https://cdn.shopify.com/videos/c/o/v/c26b170b062c47ff9515e3ea542b4859.mp4"
+            type="video/mp4"
+          />
+        </video>
+        {!imageMedia ? null : (
+          <img
+            src={imageMedia.url}
+            alt={imageMedia.altText || featuredProduct?.title || 'Valcee'}
+            className="w-full h-full object-cover scale-105 opacity-90"
+          />
+        )}
+        {/* Blur + gradient veil so foreground floats */}
+        <div className="absolute inset-0 bg-gradient-to-b from-contrast/80 via-contrast/40 to-contrast/90 backdrop-blur-md" />
+      </div>
+
+      {/* Full-page feature: centered text + actions, no box */}
+      <section className="relative flex h-full flex-col items-center justify-center px-6 text-center gap-4 fadeIn max-w-screen-xl mx-auto w-full">
+        {/* Top label: FEATURED */}
+        <div className="space-y-2 max-w-xl flex-shrink-0">
+          <Text
+            size="fine"
+            className="uppercase tracking-[0.25em] text-primary/70"
+          >
+            Featured
+          </Text>
+          <div className="flex flex-col gap-0.5 text-primary/80 text-[0.6rem] tracking-[0.28em] uppercase">
+            <span>See value</span>
+            <span>Be value</span>
+          </div>
+        </div>
+
+        {/* Featured image: largest element on the page */}
+        {imageMedia ? (
+          <Link
+            to={featuredProduct ? `/products/${featuredProduct.handle}` : '#'}
+            prefetch={featuredProduct ? 'intent' : 'none'}
+            className="relative max-w-xs w-full mx-auto tap flex-shrink-0"
+          >
+            <img
+              src={imageMedia.url}
+              alt={imageMedia.altText || featuredProduct?.title || ''}
+              className="w-full h-auto object-contain img-cutout drop-shadow-xl"
+            />
+          </Link>
+        ) : null}
+
+        {/* Product name and actions */}
+        <div className="flex flex-col items-center gap-3 flex-shrink-0">
+          {featuredProduct?.title ? (
+            <Heading as="h2" size="lead" className="tracking-wide">
+              {featuredProduct.title}
+            </Heading>
+          ) : null}
+
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+            <Link
+              to="/collections"
+              prefetch="intent"
+              className="tap inline-flex items-center justify-center px-6 py-2 text-sm text-primary/90 hover:opacity-70 transition-opacity"
+            >
+              Shop
+            </Link>
           </div>
         </div>
       </section>
     </main>
   );
 }
-
-/* collection-image responsive styles are injected on the client via useEffect above */
 

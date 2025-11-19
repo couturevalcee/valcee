@@ -4,7 +4,7 @@ const CUSTOMER_FRAGMENT = `#graphql
     number
     processedAt
     financialStatus
-    fulfillments(first: 1) {
+    fulfillments(first: 10) {
       nodes {
         status
       }
