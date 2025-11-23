@@ -53,7 +53,7 @@ export function ProductCard({
             <div className="card-image aspect-[4/5] bg-primary/5">
               {image ? (
                 <Image
-                  className="object-contain w-full fadeIn img-cutout opacity-95"
+                  className="object-cover w-full h-full fadeIn opacity-95"
                   sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
                   aspectRatio="4/5"
                   data={image}
@@ -63,7 +63,7 @@ export function ProductCard({
               ) : (
                 placeholderSrc && (
                   <img
-                    className="object-contain w-full h-full fadeIn img-cutout opacity-95"
+                    className="object-cover w-full h-full fadeIn opacity-95"
                     src={placeholderSrc}
                     alt={product.title}
                     loading={loading}
@@ -78,7 +78,7 @@ export function ProductCard({
                 {cardLabel}
               </Text>
             </div>
-            <div className="grid gap-1">
+            <div className="grid gap-0.5">
               <Text
                 className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
                 as="h3"
@@ -109,7 +109,7 @@ export function ProductCard({
             <div className="card-image aspect-[4/5] bg-primary/5">
               {image ? (
                 <Image
-                  className="object-contain w-full fadeIn img-cutout opacity-95"
+                  className="object-cover w-full h-full fadeIn opacity-95"
                   sizes="(min-width: 64em) 25vw, (min-width: 48em) 30vw, 45vw"
                   aspectRatio="4/5"
                   data={image}
@@ -119,7 +119,7 @@ export function ProductCard({
               ) : (
                 placeholderSrc && (
                   <img
-                    className="object-contain w-full h-full fadeIn img-cutout opacity-95"
+                    className="object-cover w-full h-full fadeIn opacity-95"
                     src={placeholderSrc}
                     alt={product.title}
                     loading={loading}
@@ -134,7 +134,7 @@ export function ProductCard({
                 {cardLabel}
               </Text>
             </div>
-            <div className="grid gap-1">
+            <div className="grid gap-0.5">
               <Text
                 className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
                 as="h3"

@@ -320,7 +320,7 @@ function ProductsLoadedOnScroll({
   }, [inView, navigate, state, nextPageUrl, hasNextPage]);
 
   return (
-    <Grid layout="products" data-test="product-grid" className="[&_.card-image]:transition-transform [&_.card-image]:duration-200 [&_.card-image:hover]:scale-[1.03]">
+    <Grid layout="products" data-test="product-grid" className="[&_.card-image]:transition-transform [&_.card-image]:duration-200 [&_.card-image:hover]:scale-[1.03] md:pb-[20vh]">
       {nodes.map((product, i) => (
         <ProductCard
           key={product.id}

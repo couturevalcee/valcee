@@ -50,6 +50,15 @@ export default async function handleRequest(
       'data:',
       ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:*'] : []),
     ],
+    mediaSrc: [
+      'self',
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      'https://videos.shopifycdn.com',
+      'https://couture-valcee.myshopify.com',
+      'data:',
+      ...(process.env.NODE_ENV !== 'production' ? ['http://localhost:*'] : []),
+    ],
   });
 
   const body = await renderToReadableStream(

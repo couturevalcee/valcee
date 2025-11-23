@@ -20,22 +20,22 @@ export function ProductGallery({media, className}) {
     : null;
 
   return (
-    <div className={`flex flex-col items-center gap-6 ${className}`}>
+    <div className={`flex flex-col items-center gap-2 ${className}`}>
       {/* Main Image */}
-      <div className="w-full aspect-square flex items-center justify-center overflow-hidden">
+      <div className="w-full aspect-square md:aspect-auto flex items-center justify-center overflow-hidden">
         {image && (
           <Image
             loading="eager"
             data={image}
             sizes="(min-width: 48em) 60vw, 90vw"
-            className="object-contain w-full h-full fadeIn img-cutout opacity-95 drop-shadow-xl"
+            className="object-contain w-full h-full md:w-auto md:h-auto md:max-w-full md:max-h-[50vh] lg:max-h-[55vh] fadeIn"
           />
         )}
       </div>
 
       {/* Thumbnails */}
       {media.length > 1 && (
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3 w-full">
           {media.map((med, i) => {
              const thumbImage = med.__typename === 'MediaImage' ? med.image : null;
              const isSelected = med.id === selectedMedia.id;

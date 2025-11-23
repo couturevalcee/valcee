@@ -301,6 +301,27 @@ export function IconFilters(props) {
 }
 
 /**
+ * @param {IconProps} props
+ */
+export function IconHeart({filled, ...props}) {
+  return (
+    <Icon
+      {...props}
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+    >
+      <title>Heart</title>
+      <path
+        d="M10 17.25L8.95 16.295C5.2 12.895 2.725 10.6525 2.725 7.9C2.725 5.6575 4.4075 3.975 6.65 3.975C7.9175 3.975 9.1325 4.565 10 5.5825C10.8675 4.565 12.0825 3.975 13.35 3.975C15.5925 3.975 17.275 5.6575 17.275 7.9C17.275 10.6525 14.8 12.895 11.05 16.295L10 17.25Z"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Icon>
+  );
+}
+
+/**
  * @typedef {JSX.IntrinsicElements['svg'] & {
  *   direction?: 'up' | 'right' | 'down' | 'left';
  * }} IconProps

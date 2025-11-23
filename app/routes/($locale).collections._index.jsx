@@ -1,7 +1,7 @@
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {Image, getSeoMeta} from '@shopify/hydrogen';
-import {useState, useMemo, useEffect} from 'react';
+import {useState, useMemo, useEffect, useLayoutEffect} from 'react';
 import {Link} from '~/components/Link';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
@@ -104,7 +104,7 @@ export default function Collections() {
   }, [activeFilter, products]);
 
   // Filter out 'home-page' collection from the list
-  const visibleCollections = collections.filter(c => c.handle !== 'home-page');
+  const visibleCollections = collections.filter(c => !['home-page', 'homepage', 'frontpage'].includes(c.handle));
 
   // Reset scroll when view or filter changes
   useEffect(() => {
@@ -116,98 +116,130 @@ export default function Collections() {
 
   // Enable scroll snapping for single view
   useEffect(() => {
-    const mainContent = document.getElementById('mainContent');
-    if (!mainContent) return;
+    const html = document.documentElement;
     const snapClass = 'snap-y-mandatory';
     if (zoomLevel === 1) {
-      mainContent.classList.add(snapClass);
+      html.classList.add(snapClass);
     } else {
-      mainContent.classList.remove(snapClass);
+      html.classList.remove(snapClass);
     }
-    return () => mainContent.classList.remove(snapClass);
+    return () => html.classList.remove(snapClass);
   }, [zoomLevel]);
 
+  // Measure header + bottom icons heights; derive product viewport height for single view
+  useLayoutEffect(() => {
+    const headerEl = document.getElementById('collectionsHeader');
+    const bottomEl = document.getElementById('bottomIcons');
+    const headerH = headerEl?.getBoundingClientRect().height || 0;
+    const bottomH = bottomEl?.getBoundingClientRect().height || 0;
+    document.documentElement.style.setProperty('--collections-header-height', `${Math.round(headerH)}px`);
+    document.documentElement.style.setProperty('--bottom-icons-height', `${Math.round(bottomH)}px`);
+    const productViewport = Math.max(window.innerHeight - headerH - bottomH, 320); // clamp minimum
+    document.documentElement.style.setProperty('--product-viewport-height', `${Math.round(productViewport)}px`);
+  });
+
   return (
-    <div className="min-h-screen pb-12 px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-4">
+    <div className={`px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col ${
+      zoomLevel === 1 ? 'min-h-screen pb-12' : ''
+    }`}>
       
       {/* Controls Header: Filter & Zoom */}
-      <div className="sticky top-0 z-30 bg-contrast/95 backdrop-blur-md pt-2 pb-3 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col md:flex-row items-center justify-between gap-3 border-b border-primary/10">
+      <div id="collectionsHeader" className="sticky top-[var(--height-nav)] z-30 bg-contrast/95 backdrop-blur-md pt-6 pb-2 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col gap-2 transition-all duration-300">
         
-        {/* Filter (Dropdown) */}
-        <div className="w-full md:w-auto relative text-center md:text-left">
-          <select
-            value={activeFilter}
-            onChange={(e) => setActiveFilter(e.target.value)}
-            className="appearance-none bg-transparent border-b border-primary/20 py-2 pr-8 pl-8 text-center text-sm uppercase tracking-widest font-medium focus:outline-none focus:border-primary focus:ring-0 cursor-pointer w-full md:w-auto"
+        {/* Filter (Horizontal Scrollable Pills) */}
+        <div className="w-full overflow-x-auto hiddenScroll flex items-center gap-2 pb-1">
+          <button
+            onClick={() => setActiveFilter('all')}
+            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs uppercase tracking-widest transition-all duration-300 ${
+              activeFilter === 'all'
+                ? 'bg-primary text-contrast shadow-md'
+                : 'bg-primary/5 text-primary/70 hover:bg-primary/10'
+            }`}
           >
-            <option value="all">ALL</option>
-            {visibleCollections.map((collection) => (
-              <option key={collection.id} value={collection.handle}>
-                {collection.title}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-primary">
-            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-          </div>
+            All
+          </button>
+          {visibleCollections.map((collection) => (
+            <button
+              key={collection.id}
+              onClick={() => setActiveFilter(collection.handle)}
+              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs uppercase tracking-widest transition-all duration-300 ${
+                activeFilter === collection.handle
+                  ? 'bg-primary text-contrast shadow-md'
+                  : 'bg-primary/5 text-primary/70 hover:bg-primary/10'
+              }`}
+            >
+              {collection.title}
+            </button>
+          ))}
         </div>
 
-        {/* Zoom Slider */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          <span className="text-[10px] uppercase tracking-widest opacity-50">View</span>
-          <input
-            type="range"
-            min="1"
-            max="8"
-            step="1"
-            value={zoomLevel}
-            onChange={(e) => setZoomLevel(parseInt(e.target.value))}
-            className="w-32 h-1 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary"
-            aria-label="Zoom level"
-          />
+        {/* View Toggle (Simple Icons) */}
+        <div className="flex items-center justify-end gap-4 border-t border-primary/5 pt-0.5">
+          <span className="text-[10px] uppercase tracking-widest opacity-40">Layout</span>
+          <div className="flex items-center gap-2 bg-primary/5 rounded-full p-1">
+            <button 
+              onClick={() => setZoomLevel(1)}
+              className={`p-2 rounded-full transition-all ${zoomLevel === 1 ? 'bg-primary text-contrast shadow-sm' : 'text-primary/40'}`}
+              aria-label="Single column view"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+              </svg>
+            </button>
+            <button 
+              onClick={() => setZoomLevel(2)}
+              className={`p-2 rounded-full transition-all ${zoomLevel === 2 ? 'bg-primary text-contrast shadow-sm' : 'text-primary/40'}`}
+              aria-label="Grid view"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Product Grid */}
       <div 
-        className="grid gap-x-5 gap-y-10 transition-all duration-300 ease-out"
-        style={{
-          gridTemplateColumns: `repeat(${zoomLevel}, minmax(0, 1fr))`
-        }}
+        className={`grid gap-x-4 transition-all duration-500 ease-out ${
+          zoomLevel === 1 
+            ? 'grid-cols-1' 
+            : 'gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8'
+        }`}
       >
         {filteredProducts.map((product) => (
           <Link
             key={product.id}
             to={`/products/${product.handle}`}
             prefetch="intent"
-            className={`group relative flex flex-col items-center gap-3 ${zoomLevel === 1 ? 'justify-start' : ''}`}
-            style={
-              zoomLevel === 1
-                ? {scrollSnapAlign: 'start', scrollMarginTop: '5.5rem'}
-                : undefined
-            }
+            className={`group relative transition-all duration-500 ${
+              zoomLevel === 1 
+                ? 'snap-center h-[var(--product-viewport-height)] flex flex-col items-center justify-center w-full' 
+                : 'flex flex-col items-start justify-start'
+            }`}
           >
-            <div className={`relative overflow-hidden w-full ${zoomLevel === 1 ? 'aspect-[3/4] max-h-[72vh]' : 'aspect-[4/5]'} max-w-[min(90vw,520px)] mx-auto`}>
-              {product.featuredImage && (
-                <Image
-                  data={product.featuredImage}
-                  aspectRatio={zoomLevel === 1 ? "3/4" : "4/5"}
-                  sizes="(min-width: 45em) 20vw, 50vw"
-                  className="object-contain w-full h-full transition-transform duration-300 group-hover:scale-105 img-cutout drop-shadow-xl"
-                />
-              )}
-            </div>
-            
-            {/* Product Info (Underneath) */}
-            <div className={`flex flex-col items-center text-center gap-1 transition-opacity duration-300 ${zoomLevel > 4 ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
-              <span className="text-primary text-xs uppercase tracking-widest font-medium">
-                {product.title}
-              </span>
-              {zoomLevel <= 2 && (
-                <span className="text-primary/60 text-[10px] tracking-wider">
+            {/* Unified Card Content */}
+            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-2' : 'gap-3'}`}>
+              <div className={`${zoomLevel === 1 ? 'w-full flex items-center justify-center' : 'w-full aspect-[4/5]'} overflow-hidden rounded-2xl`}>
+                {product.featuredImage && (
+                  <Image
+                    data={product.featuredImage}
+                    sizes="(min-width: 45em) 20vw, 50vw"
+                    className={`${zoomLevel === 1 ? 'max-h-[60vh] w-auto object-contain' : 'w-full h-full object-contain'} transition-transform duration-700 ease-out group-hover:scale-105`}
+                  />
+                )}
+              </div>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-primary text-sm font-medium tracking-wide group-hover:underline decoration-primary/30 underline-offset-4">
+                  {product.title}
+                </span>
+                <span className="text-primary/60 text-xs tracking-wider">
                   {product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}
                 </span>
-              )}
+              </div>
             </div>
           </Link>
         ))}

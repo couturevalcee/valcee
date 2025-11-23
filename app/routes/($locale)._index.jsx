@@ -81,7 +81,7 @@ export async function loader(args) {
     featuredProduct,
     seo: {
       title: 'Valcee Couture',
-      description: 'Featured piece',
+      description: 'The Official Store of Valcee Couture',
       url: request.url,
     },
   });
@@ -94,7 +94,7 @@ export default function Homepage() {
   const imageMedia = featuredProduct?.featuredImage || null;
 
   return (
-    <main className="relative h-[calc(100vh-var(--height-nav))] bg-contrast text-primary overflow-hidden">
+    <main className="relative flex flex-col h-[100dvh] overflow-hidden bg-contrast text-primary">
       {/* Immersive background layer */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <video
@@ -122,16 +122,16 @@ export default function Homepage() {
       </div>
 
       {/* Full-page feature: centered text + actions, no box */}
-      <section className="relative flex h-full flex-col items-center justify-center px-6 text-center gap-4 fadeIn max-w-screen-xl mx-auto w-full">
+      <section className="relative flex-grow flex flex-col items-center justify-center px-4 py-0 text-center gap-6 fadeIn max-w-screen-xl mx-auto w-full h-full">
         {/* Top label: FEATURED */}
-        <div className="space-y-2 max-w-xl flex-shrink-0">
+        <div className="space-y-3 max-w-xl flex-shrink-0">
           <Text
             size="fine"
-            className="uppercase tracking-[0.25em] text-primary/70"
+            className="uppercase tracking-[0.35em] text-primary/60 text-xs"
           >
             Featured
           </Text>
-          <div className="flex flex-col gap-0.5 text-primary/80 text-[0.6rem] tracking-[0.28em] uppercase">
+          <div className="flex flex-col gap-1 text-primary/70 text-[0.65rem] tracking-[0.3em] uppercase font-medium">
             <span>See value</span>
             <span>Be value</span>
           </div>
@@ -142,20 +142,20 @@ export default function Homepage() {
           <Link
             to={featuredProduct ? `/products/${featuredProduct.handle}` : '#'}
             prefetch={featuredProduct ? 'intent' : 'none'}
-            className="relative max-w-xs w-full mx-auto tap flex-shrink-0"
+            className="relative max-w-[65vw] md:max-w-sm w-full mx-auto tap flex-shrink transition-transform duration-500 hover:scale-105 flex items-center justify-center"
           >
             <img
               src={imageMedia.url}
               alt={imageMedia.altText || featuredProduct?.title || ''}
-              className="w-full h-auto object-contain img-cutout drop-shadow-xl"
+              className="w-full h-auto max-h-[50vh] object-contain img-cutout drop-shadow-2xl"
             />
           </Link>
         ) : null}
 
         {/* Product name and actions */}
-        <div className="flex flex-col items-center gap-3 flex-shrink-0">
+        <div className="flex flex-col items-center gap-4 flex-shrink-0">
           {featuredProduct?.title ? (
-            <Heading as="h2" size="lead" className="tracking-wide">
+            <Heading as="h2" size="lead" className="tracking-[0.1em] uppercase text-lg font-medium">
               {featuredProduct.title}
             </Heading>
           ) : null}
@@ -164,7 +164,7 @@ export default function Homepage() {
             <Link
               to="/collections"
               prefetch="intent"
-              className="tap inline-flex items-center justify-center px-6 py-2 text-sm text-primary/90 hover:opacity-70 transition-opacity"
+              className="tap inline-flex items-center justify-center px-8 py-3 text-xs uppercase tracking-[0.2em] text-primary/80 hover:text-primary transition-colors border border-transparent hover:border-primary/10 rounded-full"
             >
               Shop
             </Link>

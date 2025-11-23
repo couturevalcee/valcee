@@ -95,6 +95,7 @@ shop-pay-button {
   html {
     scroll-padding-top: 10rem;
     scroll-behavior: smooth;
+    overscroll-behavior-y: none;
   }
 
   model-viewer::part(default-progress-mask) {
@@ -246,6 +247,7 @@ shop-pay-button {
   .snap-y-mandatory {
     scroll-snap-type: y mandatory;
     scroll-behavior: smooth;
+    scroll-padding-top: var(--collections-header-height, 0px);
   }
 
   .text-accent {

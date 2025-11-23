@@ -69,6 +69,12 @@ const CUSTOMER_FRAGMENT = `#graphql
         }
       }
     }
+    wishlist: metafield(namespace: "custom", key: "wishlist") {
+      value
+    }
+    messageHistory: metafield(namespace: "custom", key: "message_history") {
+      value
+    }
   }
 `;
 

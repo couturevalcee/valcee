@@ -31,51 +31,16 @@ export function PageLayout({children, layout}) {
   const {headerMenu, footerMenu} = layout || {};
   const isHome = useIsHomePath();
   const location = useLocation();
-  const isManageRoute = (location?.pathname || '').toLowerCase().includes('manage');
-  const isHomeRoute = isHome;
+
   useEffect(() => {
-    const mainContent = document.getElementById('mainContent');
-    if (isManageRoute) {
-      window.scrollTo({top: 0, left: 0, behavior: 'auto'});
-      return;
-    }
-    if (isHomeRoute) {
-      window.scrollTo({top: 0, left: 0, behavior: 'auto'});
-      return;
-    }
-    if (mainContent) {
-      mainContent.scrollTo({top: 0, left: 0, behavior: 'auto'});
-    }
-  }, [location.pathname, location.search, isHomeRoute, isManageRoute]);
-  const mainStyle = isManageRoute
-    ? {
-        // Standard document scroll for manage pages
-        paddingTop: 'var(--height-nav)',
-        paddingBottom: 'calc(16vh + env(safe-area-inset-bottom, 0px))',
-      }
-    : isHomeRoute
-    ? {
-        // Home: no internal scroll window, just sit between header and bottom bar
-        paddingTop: 'var(--height-nav)',
-        paddingBottom: 0,
-        overflow: 'hidden',
-        height: '100vh',
-        position: 'fixed',
-        width: '100%',
-        top: 0,
-        left: 0,
-      }
-    : {
-        // Other pages: bounded scroll window between header and bottom controls
-        position: 'fixed',
-        top: 'var(--height-nav)',
-        left: 0,
-        right: 0,
-        bottom: 'calc(8.5vh + env(safe-area-inset-bottom, 0px))',
-        overflowY: 'auto',
-        WebkitOverflowScrolling: 'touch',
-        overscrollBehavior: 'contain',
-      };
+    const setHeight = () => {
+      document.documentElement.style.setProperty('--screen-height-dynamic', `${window.innerHeight}px`);
+    };
+    setHeight();
+    window.addEventListener('resize', setHeight);
+    return () => window.removeEventListener('resize', setHeight);
+  }, []);
+
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -91,8 +56,7 @@ export function PageLayout({children, layout}) {
           <main
             role="main"
             id="mainContent"
-            className="flex-grow"
-            style={mainStyle}
+            className={`flex-grow min-h-screen ${isHome ? '' : 'pt-[var(--height-nav)]'}`}
           >
           <div className="relative h-full">
             <div className="relative h-full">
@@ -102,6 +66,15 @@ export function PageLayout({children, layout}) {
         </main>
         {/* Bottom Controls */}
         <BottomBar />
+        
+        {/* Bottom Gradient Mask to feather content before icons */}
+        <div className="fixed bottom-0 left-0 right-0 h-[15vh] bg-gradient-to-t from-contrast via-contrast/80 to-transparent z-40 pointer-events-none" />
+        
+        {/* Top Gradient Mask to feather header */}
+        <div className="fixed top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-contrast via-contrast/80 to-transparent z-30 pointer-events-none" />
+        
+        {/* Desktop-only solid header background to hide scrolling content behind logo */}
+        <div className="hidden md:block fixed top-0 left-0 right-0 h-[var(--height-nav)] bg-contrast z-20 pointer-events-none" />
       </div>
       {/* Footer removed site-wide */}
     </>
@@ -165,7 +138,7 @@ function ValceeHeader({title, isHome, openCart, openMenu}) {
     <header
       role="banner"
       className={`${
-        isHome ? 'bg-contrast text-primary' : 'bg-contrast text-primary'
+        isHome ? 'bg-transparent text-primary' : 'bg-transparent text-primary'
       } flex items-center h-nav fixed z-40 top-0 left-0 right-0 justify-between w-full leading-none gap-4 px-4 md:px-8 pt-[2vh] md:pt-[1.5vh] lg:pt-[1vh]`}
     >
       {/* Left: menu trigger */}
@@ -468,6 +441,7 @@ function BottomBar() {
   return (
     <div className="fixed inset-x-0 pointer-events-none z-50" style={{bottom: '2.5vh'}}>
       <div
+        id="bottomIcons"
         ref={containerRef}
         className="w-full flex items-center justify-between"
         style={{

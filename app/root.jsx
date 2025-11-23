@@ -20,7 +20,6 @@ import invariant from 'tiny-invariant';
 import {PageLayout} from '~/components/PageLayout';
 import {GenericError} from '~/components/GenericError';
 import {NotFound} from '~/components/NotFound';
-import favicon from '~/assets/favicon.svg';
 import {seoPayload} from '~/lib/seo.server';
 import styles from '~/styles/app.css?url';
 
@@ -66,7 +65,7 @@ export const links = () => {
     },
     {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
     {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {rel: 'icon', type: 'image/png', href: '/images/valcee-logo.png'},
     {
       rel: 'stylesheet',
       href:
@@ -149,7 +148,7 @@ function loadDeferredData({context}) {
  * @param {Class<loader>>}
  */
 export const meta = ({data}) => {
-  const fallback = {title: 'Valcee Couture', description: 'Valcee Couture'};
+  const fallback = {title: 'Valcee Couture', description: 'The Official Store of Valcee Couture'};
   return getSeoMeta(data?.seo ?? fallback);
 };
 
@@ -163,7 +162,7 @@ function Layout({children}) {
   const locale = data?.selectedLocale ?? DEFAULT_LOCALE;
 
   return (
-    <html lang={locale.language}>
+    <html lang={locale.language} className="scroll-smooth">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />

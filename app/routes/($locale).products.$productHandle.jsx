@@ -1,4 +1,4 @@
-import {useRef, Suspense, useState} from 'react';
+import {useRef, Suspense, useState, useEffect} from 'react';
 import {Disclosure, Listbox} from '@headlessui/react';
 import {defer} from '@shopify/remix-oxygen';
 import {useLoaderData, Await} from '@remix-run/react';
@@ -134,12 +134,54 @@ export default function Product() {
     selectedOrFirstAvailableVariant: selectedVariant,
   });
 
+  const firstVideo = media.nodes.find((med) => med.__typename === 'Video');
+
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.defaultMuted = true;
+      videoRef.current.muted = true;
+      
+      const playVideo = async () => {
+        try {
+          await videoRef.current.play();
+        } catch (e) {
+          if (e.name !== 'AbortError') {
+            console.log('Autoplay failed:', e);
+          }
+        }
+      };
+      
+      playVideo();
+    }
+  }, [firstVideo]);
+
   return (
     <>
-      <Section className="px-4 md:px-8 lg:px-12 max-w-screen-xl mx-auto">
-        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-3 md:items-start md:gap-10 lg:gap-16">
+      {firstVideo && (
+        <div className="fixed inset-0 w-full h-full -z-10 overflow-hidden pointer-events-none">
+          <video
+            key={firstVideo.id}
+            ref={videoRef}
+            className="w-full h-full object-cover opacity-20"
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls={false}
+            poster={firstVideo.previewImage?.url}
+          >
+            {firstVideo.sources.map((source) => (
+              <source key={source.url} src={source.url} type={source.mimeType} />
+            ))}
+          </video>
+        </div>
+      )}
+      <Section className="px-4 md:px-8 lg:px-12 max-w-screen-xl mx-auto pb-40 md:pb-0">
+        <div className="flex flex-col gap-6 md:grid md:grid-cols-2 lg:grid-cols-2 md:items-center md:gap-10 lg:gap-16 md:min-h-[calc(100vh-var(--height-nav))] md:pb-[15vh]">
           {/* Left: product imagery */}
-          <div className="md:col-span-2 flex flex-col gap-4">
+          <div className="md:col-span-2 lg:col-span-1 flex flex-col gap-4 justify-center">
             <ProductGallery
               media={media.nodes}
               className="w-full"
@@ -147,7 +189,7 @@ export default function Product() {
           </div>
 
           {/* Right: details */}
-          <div className="md:col-span-1 flex flex-col gap-8 md:pt-4 sticky top-24 text-center items-center">
+          <div className="md:col-span-1 lg:col-span-1 flex flex-col gap-8 text-center items-center justify-center">
             <div className="flex flex-col gap-2 items-center">
               <Heading as="h1" className="whitespace-normal text-4xl font-bold tracking-tighter">
                 {title}
@@ -231,6 +273,7 @@ export function ProductForm({productOptions, selectedVariant, storeDomain, descr
                     key={value.name}
                     to={value.variantUriQuery ? `?${value.variantUriQuery}` : '#'}
                     preventScrollReset
+                    replace
                     className={clsx(
                       'text-sm px-3 py-1 border transition-all',
                       value.selected 
