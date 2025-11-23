@@ -22,6 +22,7 @@ import {GenericError} from '~/components/GenericError';
 import {NotFound} from '~/components/NotFound';
 import {seoPayload} from '~/lib/seo.server';
 import styles from '~/styles/app.css?url';
+import favicon from '~/assets/valcee-logo.png';
 
 import {DEFAULT_LOCALE, parseMenu} from './lib/utils';
 
@@ -65,7 +66,7 @@ export const links = () => {
     },
     {rel: 'preconnect', href: 'https://fonts.googleapis.com'},
     {rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous'},
-    {rel: 'icon', type: 'image/png', href: '/images/valcee-logo.png'},
+    {rel: 'icon', type: 'image/png', href: favicon},
     {
       rel: 'stylesheet',
       href:
