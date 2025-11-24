@@ -492,16 +492,18 @@ export function CartEmpty({hidden = false, layout = 'drawer', onClose}) {
 
   return (
     <div ref={scrollRef} className={container[layout]} hidden={hidden}>
-      <section className="grid gap-6">
-        <Text format>
-          Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-          started!
-        </Text>
-        <div>
-          <Button onClick={onClose}>Continue shopping</Button>
+      <section className="flex flex-col items-center justify-center py-24 px-6">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-medium tracking-tight mb-4">Your Cart is Empty</h2>
+          <p className="text-primary/50 text-sm mb-8">
+            Discover timeless pieces from our collection
+          </p>
+          <Button onClick={onClose} className="min-w-[200px]">
+            Continue Shopping
+          </Button>
         </div>
       </section>
-      <section className="grid gap-8 pt-16">
+      <section className="border-t border-primary/10 pt-8">
         <FeaturedProducts
           count={4}
           heading="Shop Best Sellers"
