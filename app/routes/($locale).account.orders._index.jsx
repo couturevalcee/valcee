@@ -1,7 +1,7 @@
 import {useOutletContext, Link} from '@remix-run/react';
 import {flattenConnection, Image} from '@shopify/hydrogen';
 import {Text} from '~/components/Text';
-import {statusMessage, usePrefixPathWithLocale} from '~/lib/utils';
+import {statusMessage} from '~/lib/utils';
 
 export const handle = {
   renderInModal: true,
@@ -20,14 +20,14 @@ export default function AccountOrders() {
 
 function EmptyOrders() {
   return (
-    <div className="text-center py-6">
-      <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/5 flex items-center justify-center">
-        <PackageIcon className="w-7 h-7 text-primary/25" />
+    <div className="text-center py-12">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center">
+        <PackageIcon className="w-8 h-8 text-primary/25" />
       </div>
-      <Text className="text-primary/50 text-sm mb-4">No orders yet</Text>
+      <Text className="text-primary/50 text-sm mb-6">No orders yet</Text>
       <Link
-        to={usePrefixPathWithLocale('/')}
-        className="inline-block px-5 py-2 rounded-full border border-primary/15 text-xs font-medium hover:bg-primary hover:text-contrast transition-colors"
+        to="/"
+        className="inline-block px-6 py-2.5 rounded-full border border-primary/20 text-sm font-medium hover:bg-primary hover:text-contrast transition-colors"
       >
         Start Shopping
       </Link>

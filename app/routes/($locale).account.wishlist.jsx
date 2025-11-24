@@ -1,8 +1,6 @@
 import {useOutletContext, Await, Link} from '@remix-run/react';
 import {Text} from '~/components/Text';
-import {ProductCard} from '~/components/ProductCard';
 import {AddToWishlist} from '~/components/AddToWishlist';
-import {usePrefixPathWithLocale} from '~/lib/utils';
 import {Suspense} from 'react';
 
 export const handle = {
@@ -87,14 +85,14 @@ function WishlistItem({product, wishlistIds}) {
 
 function EmptyWishlist() {
   return (
-    <div className="text-center py-6">
-      <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/5 flex items-center justify-center">
-        <HeartIcon className="w-7 h-7 text-primary/25" />
+    <div className="text-center py-12">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center">
+        <HeartIcon className="w-8 h-8 text-primary/25" />
       </div>
-      <Text className="text-primary/50 text-sm mb-4">Your wishlist is empty</Text>
+      <Text className="text-primary/50 text-sm mb-6">Your wishlist is empty</Text>
       <Link
-        to={usePrefixPathWithLocale('/')}
-        className="inline-block px-5 py-2 rounded-full border border-primary/15 text-xs font-medium hover:bg-primary hover:text-contrast transition-colors"
+        to="/"
+        className="inline-block px-6 py-2.5 rounded-full border border-primary/20 text-sm font-medium hover:bg-primary hover:text-contrast transition-colors"
       >
         Explore Products
       </Link>

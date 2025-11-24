@@ -148,7 +148,7 @@ export default function Authenticated() {
     <div className="min-h-screen">
       {/* Desktop Layout */}
       <div className="hidden lg:block">
-        <div className="max-w-5xl mx-auto px-8 py-12">
+        <div className="max-w-6xl mx-auto px-8 py-12">
           {/* Header */}
           <header className="flex items-center justify-between mb-10">
             <div>
@@ -169,31 +169,29 @@ export default function Authenticated() {
             </Form>
           </header>
 
-          {/* Content */}
-          {isSubRoute ? (
-            <div className="grid grid-cols-[280px_1fr] gap-16">
-              {/* Sidebar Nav */}
-              <nav className="space-y-1">
+          {/* Two Column Layout - Always show sidebar */}
+          <div className="grid grid-cols-[220px_1fr] gap-12">
+            {/* Sidebar Nav */}
+            <aside>
+              <nav className="sticky top-8 space-y-1">
                 <NavItem to="/account" end>Overview</NavItem>
                 <NavItem to="/account/orders">Orders</NavItem>
                 <NavItem to="/account/wishlist">Wishlist</NavItem>
                 <NavItem to="/account/settings">Settings</NavItem>
                 <NavItem to="/account/contact">Help</NavItem>
               </nav>
-              
-              {/* Detail Content */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-medium">{subRouteTitle}</h2>
-                </div>
-                <div className="rounded-2xl border border-primary/10 bg-contrast/50 backdrop-blur-sm p-6">
-                  <Outlet context={outletContext} />
-                </div>
+            </aside>
+            
+            {/* Main Content */}
+            <main>
+              {isSubRoute && subRouteTitle && (
+                <h2 className="text-xl font-medium mb-6">{subRouteTitle}</h2>
+              )}
+              <div className={isSubRoute ? "rounded-2xl border border-primary/10 bg-contrast/50 backdrop-blur-sm p-6" : ""}>
+                <Outlet context={outletContext} />
               </div>
-            </div>
-          ) : (
-            <Outlet context={outletContext} />
-          )}
+            </main>
+          </div>
         </div>
       </div>
 
@@ -203,25 +201,22 @@ export default function Authenticated() {
           /* Sub-route: Full screen with back nav */
           <div className="min-h-screen flex flex-col">
             {/* Sticky Header */}
-            <header className="sticky top-0 z-40 bg-contrast/80 backdrop-blur-lg border-b border-primary/10">
-              <div className="flex items-center justify-between px-4 py-4">
+            <header className="sticky top-0 z-40 bg-contrast/95 backdrop-blur-lg border-b border-primary/10">
+              <div className="flex items-center h-14 px-4">
                 <Link 
                   to="/account" 
-                  className="flex items-center gap-2 text-sm text-primary/70"
+                  className="flex items-center gap-1.5 text-sm text-primary/70 hover:text-primary"
                 >
                   <ChevronLeftIcon />
-                  <span>Account</span>
+                  <span>Back</span>
                 </Link>
-                <h1 className="text-base font-medium">{subRouteTitle}</h1>
-                <div className="w-16" /> {/* Spacer for centering */}
+                <h1 className="flex-1 text-center text-base font-medium pr-12">{subRouteTitle}</h1>
               </div>
             </header>
             
             {/* Content */}
             <main className="flex-1 px-4 py-6">
-              <div className="max-w-lg mx-auto">
-                <Outlet context={outletContext} />
-              </div>
+              <Outlet context={outletContext} />
             </main>
           </div>
         ) : (
@@ -246,9 +241,7 @@ export default function Authenticated() {
               </Form>
             </header>
             
-            <main className="max-w-lg mx-auto">
-              <Outlet context={outletContext} />
-            </main>
+            <Outlet context={outletContext} />
           </div>
         )}
       </div>
