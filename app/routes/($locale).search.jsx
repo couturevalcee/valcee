@@ -81,15 +81,32 @@ export default function Search() {
   const [zoomLevel, setZoomLevel] = useState(4);
 
   return (
-    <div className="min-h-screen pb-12 px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-8 pt-24">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-primary/5 pb-4">
-        <Heading as="h1" size="lead" className="uppercase tracking-widest">
-          {searchTerm ? `Results for "${searchTerm}"` : 'Search'}
-        </Heading>
+    <div className="min-h-screen pb-12 px-6 md:px-12 max-w-screen-2xl mx-auto flex flex-col gap-8 pt-20">
+      <div className="flex flex-col items-center gap-6 py-8">
+        <h1 className="text-sm uppercase tracking-[0.3em] text-primary/60 font-light">
+          {searchTerm ? 'Search Results' : 'Search'}
+        </h1>
         
-        {!noResults && (
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] uppercase tracking-widest opacity-50">View</span>
+        <Form method="get" className="relative w-full max-w-2xl">
+          <Input
+            defaultValue={searchTerm}
+            name="q"
+            placeholder="Search for timeless pieces..."
+            type="search"
+            variant="search"
+            className="w-full rounded-full bg-contrast/40 backdrop-blur-sm border border-primary/10 px-8 py-4 text-center text-base focus:border-primary/30 focus:ring-2 focus:ring-primary/20 placeholder:text-primary/40"
+          />
+          <button 
+            className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-primary text-contrast px-6 py-2 text-sm uppercase tracking-wider hover:bg-primary/90 transition-colors" 
+            type="submit"
+          >
+            Search
+          </button>
+        </Form>
+
+        {searchTerm && !noResults && (
+          <div className="flex items-center gap-4 bg-contrast/30 backdrop-blur-sm rounded-full px-6 py-3 border border-primary/10">
+            <span className="text-[10px] uppercase tracking-widest text-primary/50">Grid Size</span>
             <input
               type="range"
               min="1"
@@ -97,26 +114,13 @@ export default function Search() {
               step="1"
               value={zoomLevel}
               onChange={(e) => setZoomLevel(parseInt(e.target.value))}
-              className="w-32 h-1 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary"
-              aria-label="Zoom level"
+              className="w-32 h-1 bg-primary/20 rounded-full appearance-none cursor-pointer accent-primary"
+              aria-label="Grid size"
             />
+            <span className="text-[10px] text-primary/50">{zoomLevel}</span>
           </div>
         )}
       </div>
-
-      <Form method="get" className="relative flex w-full max-w-md mx-auto text-heading mb-8">
-        <Input
-          defaultValue={searchTerm}
-          name="q"
-          placeholder="Search…"
-          type="search"
-          variant="search"
-          className="text-center uppercase tracking-widest"
-        />
-        <button className="absolute right-0 py-2 px-4" type="submit">
-          GO
-        </button>
-      </Form>
 
       {!searchTerm || noResults ? (
         <NoResults
@@ -173,11 +177,11 @@ export default function Search() {
                     })}
                   </div>
                   
-                  <div className="flex items-center justify-center mt-12 gap-4">
-                    <PreviousLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary hover:bg-primary/5 transition-colors">
+                  <div className="flex items-center justify-center mt-16 gap-6">
+                    <PreviousLink className="inline-block rounded-full font-medium text-center py-3 px-8 border border-primary/10 bg-contrast/40 backdrop-blur-sm text-primary hover:bg-primary/5 transition-all text-sm uppercase tracking-wider">
                       {isLoading ? 'Loading...' : 'Previous'}
                     </PreviousLink>
-                    <NextLink className="inline-block rounded font-medium text-center py-3 px-6 border border-primary/10 bg-contrast text-primary hover:bg-primary/5 transition-colors">
+                    <NextLink className="inline-block rounded-full font-medium text-center py-3 px-8 border border-primary/10 bg-contrast/40 backdrop-blur-sm text-primary hover:bg-primary/5 transition-all text-sm uppercase tracking-wider">
                       {isLoading ? 'Loading...' : 'Next'}
                     </NextLink>
                   </div>
@@ -202,11 +206,11 @@ function NoResults({noResults, recommendations}) {
   return (
     <>
       {noResults && (
-        <Section padding="x">
-          <Text className="opacity-50">
-            No results, try a different search.
-          </Text>
-        </Section>
+        <div className="flex flex-col items-center justify-center py-20 px-6">
+          <p className="text-sm text-primary/50 uppercase tracking-wider">
+            No results found
+          </p>
+        </div>
       )}
       <Suspense>
         <Await

@@ -542,24 +542,24 @@ function BottomBar() {
               }}
             >
               <div
-                className={`flex flex-col gap-2 bg-contrast/85 backdrop-blur-md text-primary rounded-md ring-1 ring-primary/10 ${
+                className={`flex flex-col gap-3 bg-contrast/90 backdrop-blur-xl text-primary rounded-3xl border border-primary/10 shadow-xl ${
                   searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.4vh]'
                 }`}
                 style={{
-                  padding: '1.2vh 2.6vw',
+                  padding: '1.6vh 2.4vw',
                   transition:
                     'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
-                  minWidth: '300px'
+                  minWidth: '400px'
                 }}
               >
-                <form role="search" action="/search" method="get" className="flex items-center gap-2 w-full">
+                <form role="search" action="/search" method="get" className="flex items-center gap-3 w-full">
                   <input
                     ref={searchInputRef}
                     name="q"
                     type="search"
-                    placeholder="Search…"
+                    placeholder="Search for timeless pieces..."
                     onChange={handleSearchChange}
-                    className={`${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} w-[70vw] md:w-[42vw] max-w-[90vw] md:max-w-[50vw] text-primary placeholder:text-primary/60 bg-contrast/30 rounded-full px-4 py-2 ring-1 ring-primary/20 focus:ring-2 focus:ring-primary/40 focus:outline-none text-base md:text-lg`}
+                    className={`${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} flex-1 text-primary placeholder:text-primary/40 bg-contrast/40 backdrop-blur-sm rounded-full px-5 py-2.5 border border-primary/10 focus:border-primary/30 focus:ring-2 focus:ring-primary/20 focus:outline-none text-sm`}
                     style={{
                       transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
                       transitionDelay: searchOpen ? '60ms' : '0ms',
@@ -567,19 +567,19 @@ function BottomBar() {
                   />
                   <button
                     type="submit"
-                    className={`tap ${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} rounded-full px-4 py-2 bg-primary text-contrast hover:bg-primary/90 transition-colors shadow`}
+                    className={`tap ${searchOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'} rounded-full px-5 py-2.5 bg-primary text-contrast hover:bg-primary/90 transition-colors text-sm uppercase tracking-wider font-medium`}
                     style={{
                       transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
                       transitionDelay: searchOpen ? '120ms' : '0ms',
                     }}
                   >
-                    Go
+                    Search
                   </button>
                 </form>
                 
                 {/* Desktop Results */}
                 {searchTerm && (
-                  <div className="w-full border-t border-primary/10 pt-2 mt-2">
+                  <div className="w-full border-t border-primary/10 pt-3 mt-1 max-h-[60vh] overflow-y-auto rounded-2xl">
                     <PredictiveResults items={searchResults} term={searchTerm} />
                   </div>
                 )}
@@ -592,35 +592,35 @@ function BottomBar() {
       {/* Mobile full-screen search overlay */}
       {searchOpen && (
         <div
-          className="fixed inset-0 z-[60] md:hidden pointer-events-auto bg-contrast/60 backdrop-blur-sm transition-opacity"
+          className="fixed inset-0 z-[60] md:hidden pointer-events-auto bg-contrast/70 backdrop-blur-lg transition-opacity"
           onClick={() => setSearchOpen(false)}
-          style={{padding: '8vh 6vw'}}
+          style={{padding: '10vh 6vw'}}
         >
           <div
-            className="relative mx-auto flex flex-col gap-4"
+            className="relative mx-auto flex flex-col gap-6"
             onClick={(e) => e.stopPropagation()}
             style={{width: '88vw'}}
           >
-            <form role="search" action="/search" method="get" className="flex items-center gap-[4vw] w-full">
+            <form role="search" action="/search" method="get" className="flex flex-col gap-4 w-full">
               <input
                 ref={searchInputRef}
                 name="q"
                 type="search"
-                placeholder="Search…"
+                placeholder="Search for timeless pieces..."
                 onChange={handleSearchChange}
-                className="flex-1 bg-contrast/80 text-primary placeholder:text-primary/60 rounded-full px-[4vw] py-[2.6vh] ring-1 ring-primary/25 focus:ring-2 focus:ring-primary/40 focus:outline-none text-[max(1rem,3.8vw)]"
+                className="w-full bg-contrast/90 backdrop-blur-sm text-primary placeholder:text-primary/40 rounded-full px-6 py-4 border border-primary/10 focus:border-primary/30 focus:ring-2 focus:ring-primary/20 focus:outline-none text-base"
               />
               <button
                 type="submit"
-                className="rounded-full px-[4vw] py-[2.2vh] bg-primary text-contrast hover:bg-primary/90 transition-colors shadow text-[max(1rem,3.6vw)]"
+                className="w-full rounded-full py-4 bg-primary text-contrast hover:bg-primary/90 transition-colors text-sm uppercase tracking-wider font-medium"
               >
-                Go
+                Search
               </button>
             </form>
 
             {/* Mobile Results */}
             {searchTerm && (
-              <div className="bg-contrast/90 backdrop-blur-md rounded-lg p-4 shadow-lg max-h-[60vh] overflow-y-auto">
+              <div className="bg-contrast/95 backdrop-blur-xl rounded-3xl p-5 border border-primary/10 shadow-2xl max-h-[55vh] overflow-y-auto">
                 <PredictiveResults items={searchResults} term={searchTerm} />
               </div>
             )}
@@ -628,9 +628,9 @@ function BottomBar() {
             <button
               aria-label="Close search"
               onClick={() => setSearchOpen(false)}
-              className="absolute -top-[5vh] right-0 text-primary"
+              className="absolute -top-[6vh] right-0 text-primary opacity-80 hover:opacity-100 transition-opacity"
             >
-              <IconClose className="w-[7vw] h-[7vw]" />
+              <IconClose className="w-8 h-8" />
             </button>
           </div>
         </div>
@@ -643,29 +643,31 @@ function PredictiveResults({items, term}) {
   if (!term) return null;
   if (items.length === 0) {
     return (
-      <div className="p-4 text-center text-primary/60 uppercase tracking-widest text-xs">
-        Not found
+      <div className="py-8 text-center text-primary/50 uppercase tracking-wider text-xs">
+        No results found
       </div>
     );
   }
   return (
-    <div className="grid gap-2">
+    <div className="grid gap-3">
       {items.map((product) => (
         <Link
           key={product.id}
           to={`/products/${product.handle}`}
-          className="flex items-center gap-4 p-2 hover:bg-primary/5 rounded transition-colors"
+          className="flex items-center gap-4 p-3 hover:bg-primary/5 rounded-2xl transition-all group"
         >
           {product.featuredImage && (
-            <img
-              src={product.featuredImage.url}
-              alt={product.featuredImage.altText}
-              className="w-12 h-12 object-contain rounded-sm bg-white"
-            />
+            <div className="w-16 h-16 rounded-xl overflow-hidden bg-contrast/40 backdrop-blur-sm border border-primary/5 flex-shrink-0">
+              <img
+                src={product.featuredImage.url}
+                alt={product.featuredImage.altText}
+                className="w-full h-full object-contain transition-transform group-hover:scale-105"
+              />
+            </div>
           )}
-          <div className="flex flex-col text-left">
-            <span className="text-sm font-medium uppercase tracking-wide">{product.title}</span>
-            <span className="text-xs text-primary/60">
+          <div className="flex flex-col text-left gap-1 flex-1 min-w-0">
+            <span className="text-sm font-medium uppercase tracking-wide truncate">{product.title}</span>
+            <span className="text-xs text-primary/50 tracking-wider">
               {product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}
             </span>
           </div>
