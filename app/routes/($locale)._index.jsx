@@ -97,28 +97,15 @@ export default function Homepage() {
     <main className="fixed inset-0 flex flex-col overflow-hidden bg-contrast text-primary">
       {/* Immersive background layer */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        <video
-          className="w-full h-full object-cover scale-105 opacity-90"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={imageMedia?.url}
-        >
-          <source
-            src="https://cdn.shopify.com/videos/c/o/v/c26b170b062c47ff9515e3ea542b4859.mp4"
-            type="video/mp4"
-          />
-        </video>
-        {!imageMedia ? null : (
+        {imageMedia && (
           <img
             src={imageMedia.url}
             alt={imageMedia.altText || featuredProduct?.title || 'Valcee'}
-            className="w-full h-full object-cover scale-105 opacity-90"
+            className="w-full h-full object-cover scale-110 blur-2xl opacity-60"
           />
         )}
-        {/* Blur + gradient veil so foreground floats */}
-        <div className="absolute inset-0 bg-gradient-to-b from-contrast/80 via-contrast/40 to-contrast/90 backdrop-blur-md" />
+        {/* Gradient veil so foreground floats */}
+        <div className="absolute inset-0 bg-gradient-to-b from-contrast/80 via-contrast/40 to-contrast/90" />
       </div>
 
       {/* Full-page feature: centered text + actions, no box */}

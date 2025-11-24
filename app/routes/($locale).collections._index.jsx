@@ -121,13 +121,16 @@ export default function Collections() {
     if (zoomLevel === 1) {
       html.classList.add(snapClass);
       html.style.scrollPaddingTop = 'var(--collections-header-height)';
+      html.style.scrollBehavior = 'auto'; // Disable smooth scroll to prevent conflict with snap
     } else {
       html.classList.remove(snapClass);
       html.style.scrollPaddingTop = '';
+      html.style.scrollBehavior = '';
     }
     return () => {
       html.classList.remove(snapClass);
       html.style.scrollPaddingTop = '';
+      html.style.scrollBehavior = '';
     };
   }, [zoomLevel]);
 
