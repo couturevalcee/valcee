@@ -5,14 +5,15 @@ import {
   useLoaderData,
   useMatches,
   useOutlet,
+  Link,
 } from '@remix-run/react';
 import {Suspense} from 'react';
 import {defer, redirect} from '@shopify/remix-oxygen';
 import {flattenConnection} from '@shopify/hydrogen';
-import {Modal} from '~/components/Modal';
 import {usePrefixPathWithLocale} from '~/lib/utils';
 import {CACHE_NONE, routeHeaders} from '~/data/cache';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
+import {IconClose} from '~/components/Icon';
 
 import {getFeaturedData} from './($locale).featured-products';
 
@@ -120,56 +121,165 @@ export async function loader({request, context, params}) {
 export default function Authenticated() {
   /** @type {LoaderReturnData} */
   const data = useLoaderData();
-  const outlet = useOutlet();
   const matches = useMatches();
 
-  // routes that export handle { renderInModal: true }
-  const renderOutletInModal = matches.some((match) => {
+  // Check if we're on a sub-route (orders, wishlist, settings, contact)
+  const isSubRoute = matches.some((match) => {
     const handle = match?.handle;
     return handle?.renderInModal;
   });
 
-  // Get modal title and size from route handle
-  const modalConfig = matches.reduce((acc, match) => {
+  // Get the title for sub-routes
+  const subRouteTitle = matches.reduce((acc, match) => {
     const handle = match?.handle;
     if (handle?.renderInModal) {
-      return {
-        title: handle.modalTitle || getModalTitle(match.pathname),
-        size: handle.modalSize || 'lg',
-      };
+      return handle.modalTitle || getModalTitle(match.pathname);
     }
     return acc;
-  }, {title: '', size: 'lg'});
+  }, '');
 
-  // On desktop (lg+), render as side panel; on mobile, use modal
-  if (renderOutletInModal) {
-    return (
-      <>
-        {/* Mobile: Modal */}
-        <div className="lg:hidden">
-          <Modal cancelLink="/account" title={modalConfig.title} size={modalConfig.size}>
-            <Outlet context={{
-              customer: data.customer, 
-              featuredDataPromise: data.featuredDataPromise,
-              wishlistProductsPromise: data.wishlistProductsPromise
-            }} />
-          </Modal>
-        </div>
-        {/* Desktop: Side-by-side layout */}
-        <div className="hidden lg:block">
-          <AccountLayoutDesktop data={data} modalTitle={modalConfig.title}>
-            <Outlet context={{
-              customer: data.customer, 
-              featuredDataPromise: data.featuredDataPromise,
-              wishlistProductsPromise: data.wishlistProductsPromise
-            }} />
-          </AccountLayoutDesktop>
-        </div>
-      </>
-    );
-  }
+  const outletContext = {
+    customer: data.customer,
+    featuredDataPromise: data.featuredDataPromise,
+    wishlistProductsPromise: data.wishlistProductsPromise,
+  };
 
-  return <AccountLayout data={data} />;
+  return (
+    <div className="min-h-screen">
+      {/* Desktop Layout */}
+      <div className="hidden lg:block">
+        <div className="max-w-5xl mx-auto px-8 py-12">
+          {/* Header */}
+          <header className="flex items-center justify-between mb-10">
+            <div>
+              <h1 className="text-3xl font-medium tracking-tight">
+                {data.customer?.firstName || 'Account'}
+              </h1>
+              <p className="text-sm text-primary/50 mt-1">
+                {data.customer?.emailAddress?.emailAddress}
+              </p>
+            </div>
+            <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
+              <button 
+                type="submit" 
+                className="text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
+              >
+                Sign out
+              </button>
+            </Form>
+          </header>
+
+          {/* Content */}
+          {isSubRoute ? (
+            <div className="grid grid-cols-[280px_1fr] gap-16">
+              {/* Sidebar Nav */}
+              <nav className="space-y-1">
+                <NavItem to="/account" end>Overview</NavItem>
+                <NavItem to="/account/orders">Orders</NavItem>
+                <NavItem to="/account/wishlist">Wishlist</NavItem>
+                <NavItem to="/account/settings">Settings</NavItem>
+                <NavItem to="/account/contact">Help</NavItem>
+              </nav>
+              
+              {/* Detail Content */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-medium">{subRouteTitle}</h2>
+                </div>
+                <div className="rounded-2xl border border-primary/10 bg-contrast/50 backdrop-blur-sm p-6">
+                  <Outlet context={outletContext} />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <Outlet context={outletContext} />
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden">
+        {isSubRoute ? (
+          /* Sub-route: Full screen with back nav */
+          <div className="min-h-screen flex flex-col">
+            {/* Sticky Header */}
+            <header className="sticky top-0 z-40 bg-contrast/80 backdrop-blur-lg border-b border-primary/10">
+              <div className="flex items-center justify-between px-4 py-4">
+                <Link 
+                  to="/account" 
+                  className="flex items-center gap-2 text-sm text-primary/70"
+                >
+                  <ChevronLeftIcon />
+                  <span>Account</span>
+                </Link>
+                <h1 className="text-base font-medium">{subRouteTitle}</h1>
+                <div className="w-16" /> {/* Spacer for centering */}
+              </div>
+            </header>
+            
+            {/* Content */}
+            <main className="flex-1 px-4 py-6">
+              <div className="max-w-lg mx-auto">
+                <Outlet context={outletContext} />
+              </div>
+            </main>
+          </div>
+        ) : (
+          /* Main account page */
+          <div className="px-4 py-6">
+            <header className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-xl font-medium tracking-tight">
+                  {data.customer?.firstName || 'Account'}
+                </h1>
+                <p className="text-xs text-primary/50 mt-0.5">
+                  {data.customer?.emailAddress?.emailAddress}
+                </p>
+              </div>
+              <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
+                <button 
+                  type="submit" 
+                  className="text-[10px] text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
+                >
+                  Sign out
+                </button>
+              </Form>
+            </header>
+            
+            <main className="max-w-lg mx-auto">
+              <Outlet context={outletContext} />
+            </main>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function NavItem({to, children, end}) {
+  return (
+    <Link
+      to={to}
+      end={end}
+      className={({isActive}) =>
+        `block px-4 py-2.5 rounded-xl text-sm transition-colors ${
+          isActive 
+            ? 'bg-primary/10 text-primary font-medium' 
+            : 'text-primary/60 hover:bg-primary/5 hover:text-primary'
+        }`
+      }
+    >
+      {children}
+    </Link>
+  );
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+  );
 }
 
 function getModalTitle(pathname) {
@@ -180,91 +290,6 @@ function getModalTitle(pathname) {
   if (pathname.includes('/address')) return 'Address';
   if (pathname.includes('/contact')) return 'Help';
   return '';
-}
-
-function AccountLayout({data}) {
-  return (
-    <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-12 max-w-lg lg:max-w-6xl mx-auto">
-      <header className="flex items-center justify-between mb-6 lg:mb-10">
-        <div>
-          <h1 className="text-xl lg:text-3xl font-medium tracking-tight">
-            {data.customer?.firstName || 'Account'}
-          </h1>
-          <p className="text-xs lg:text-sm text-primary/50 mt-0.5">
-            {data.customer?.emailAddress?.emailAddress}
-          </p>
-        </div>
-        <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
-          <button 
-            type="submit" 
-            className="text-[10px] lg:text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
-          >
-            Sign out
-          </button>
-        </Form>
-      </header>
-
-      <main>
-        <Outlet context={{
-          customer: data.customer, 
-          featuredDataPromise: data.featuredDataPromise,
-          wishlistProductsPromise: data.wishlistProductsPromise
-        }} />
-      </main>
-    </div>
-  );
-}
-
-function AccountLayoutDesktop({data, modalTitle, children}) {
-  return (
-    <div className="px-8 lg:px-12 py-12 max-w-6xl mx-auto">
-      <header className="flex items-center justify-between mb-10">
-        <div>
-          <h1 className="text-3xl font-medium tracking-tight">
-            {data.customer?.firstName || 'Account'}
-          </h1>
-          <p className="text-sm text-primary/50 mt-0.5">
-            {data.customer?.emailAddress?.emailAddress}
-          </p>
-        </div>
-        <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
-          <button 
-            type="submit" 
-            className="text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
-          >
-            Sign out
-          </button>
-        </Form>
-      </header>
-
-      <div className="grid lg:grid-cols-[1fr_400px] gap-12">
-        {/* Left: Dashboard */}
-        <main>
-          <Outlet context={{
-            customer: data.customer, 
-            featuredDataPromise: data.featuredDataPromise,
-            wishlistProductsPromise: data.wishlistProductsPromise
-          }} />
-        </main>
-
-        {/* Right: Detail Panel */}
-        <aside className="lg:border-l lg:border-primary/10 lg:pl-12">
-          <div className="sticky top-24">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-medium">{modalTitle}</h2>
-              <a 
-                href="/account" 
-                className="text-xs text-primary/40 hover:text-primary uppercase tracking-widest"
-              >
-                Close
-              </a>
-            </div>
-            {children}
-          </div>
-        </aside>
-      </div>
-    </div>
-  );
 }
 
 /**
