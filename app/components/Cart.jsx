@@ -150,7 +150,7 @@ function CartLines({layout = 'drawer', lines: cartLines}) {
   const {y} = useScroll(scrollRef);
 
   const className = clsx([
-    y > 0 ? 'border-t' : '',
+    y > 0 ? 'border-t border-primary/10' : '',
     layout === 'page'
       ? 'flex-grow md:translate-y-4'
       : 'px-6 pb-6 sm-max:pt-2 overflow-auto transition md:px-12',
@@ -162,7 +162,7 @@ function CartLines({layout = 'drawer', lines: cartLines}) {
       aria-labelledby="cart-contents"
       className={className}
     >
-      <ul className="grid gap-6 md:gap-10">
+      <ul className="grid gap-8 md:gap-10">
         {currentLines.map((line) => (
           <CartLineItem key={line.id} line={line} />
         ))}
@@ -246,8 +246,8 @@ function CartCheckoutActions({checkoutUrl, cart}) {
  */
 function CartSummary({cost, layout, children = null}) {
   const summary = {
-    drawer: 'grid gap-4 p-6 border-t md:px-12',
-    page: 'sticky top-nav grid gap-6 p-4 md:px-6 md:translate-y-4 bg-primary/5 rounded w-full',
+    drawer: 'grid gap-6 p-6 border-t border-primary/10 md:px-12 bg-primary/[0.02]',
+    page: 'sticky top-nav grid gap-6 p-6 md:px-8 md:translate-y-4 bg-primary/5 rounded-xl border border-primary/10 w-full',
   };
 
   return (
@@ -299,7 +299,7 @@ function CartLineItem({line}) {
           <Image
             width={110}
             data={merchandise.image}
-            className="object-contain object-left w-24 h-auto rounded md:w-28"
+            className="object-contain object-left w-24 h-auto rounded-xl md:w-28"
             alt={merchandise.title}
           />
         )}
@@ -355,7 +355,7 @@ function ItemRemoveButton({lineId}) {
       }}
     >
       <button
-        className="flex items-center justify-center w-10 h-10 border rounded"
+        className="flex items-center justify-center w-10 h-10 border border-primary/20 rounded-lg transition-colors hover:border-primary/40 hover:bg-primary/5"
         type="submit"
       >
         <span className="sr-only">Remove</span>
@@ -386,12 +386,12 @@ function CartLineQuantityAdjust({line}) {
       <label htmlFor={`quantity-${lineId}`} className="sr-only">
         Quantity, {optimisticQuantity}
       </label>
-      <div className="flex items-center border rounded">
+      <div className="flex items-center border border-primary/20 rounded-lg overflow-hidden">
         <UpdateCartButton lines={[{id: lineId, quantity: prevQuantity}]}>
           <button
             name="decrease-quantity"
             aria-label="Decrease quantity"
-            className="w-10 h-10 transition text-primary/50 hover:text-primary disabled:text-primary/10"
+            className="w-10 h-10 transition text-primary/50 hover:text-primary hover:bg-primary/5 disabled:text-primary/10"
             value={prevQuantity}
             disabled={optimisticQuantity <= 1}
           >
@@ -409,7 +409,7 @@ function CartLineQuantityAdjust({line}) {
 
         <UpdateCartButton lines={[{id: lineId, quantity: nextQuantity}]}>
           <button
-            className="w-10 h-10 transition text-primary/50 hover:text-primary"
+            className="w-10 h-10 transition text-primary/50 hover:text-primary hover:bg-primary/5"
             name="increase-quantity"
             value={nextQuantity}
             aria-label="Increase quantity"
