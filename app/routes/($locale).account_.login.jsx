@@ -30,32 +30,27 @@ export default function AccountLogin() {
   const isSubmitting = navigation.state !== 'idle';
 
   return (
-    <div className="px-4 py-12">
-      <PageHeader heading="Account access">
-        <Text>Sign in to view orders, saved measurements, and tailored recommendations.</Text>
-      </PageHeader>
-      <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-8 py-10 shadow-lg">
-        <Form method="post" className="space-y-4">
-          <Text>We use Shopify&apos;s secure customer portal for authentication.</Text>
+    <div className="flex items-center justify-center min-h-[70vh] px-4 py-12">
+      <div className="w-full max-w-md rounded-3xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-8 py-12 space-y-6">
+        <h1 className="text-center text-sm uppercase tracking-[0.3em] text-primary/60 font-light">
+          Account
+        </h1>
+        
+        <Form method="post" className="space-y-6">
           <Button
             type="submit"
-            className="w-full"
+            className="w-full rounded-full"
             variant="primary"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Redirecting…' : 'Continue to secure login'}
+            {isSubmitting ? 'Redirecting…' : 'Sign In'}
           </Button>
-          <Text size="fine" color="subtle">
-            This window will redirect you to Shopify where you can log in or create a new account. Once finished you will return here automatically.
-          </Text>
         </Form>
-        <div className="mt-6 text-center">
-          <Text size="fine" color="subtle">
-            Need help?{' '}
-            <Link to="/contact" className="underline">
-              Contact us
-            </Link>
-          </Text>
+        
+        <div className="text-center">
+          <Link to="/contact" className="text-xs text-primary/50 uppercase tracking-wider hover:text-primary/70 transition-colors">
+            Contact
+          </Link>
         </div>
       </div>
     </div>
