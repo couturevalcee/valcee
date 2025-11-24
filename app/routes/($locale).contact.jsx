@@ -101,24 +101,13 @@ export default function ContactPage() {
       className="px-4 md:px-8 max-w-4xl mx-auto py-10 sm:py-14 space-y-10"
     >
       <header className="space-y-4 text-center sm:text-left">
-        <p className="text-xs uppercase tracking-[0.35em] text-primary/60">
-          Concierge desk
-        </p>
         <Heading
           as="h1"
           size="display"
           className="text-4xl sm:text-5xl tracking-tight uppercase"
         >
-          Contact Valcee
+          Contact
         </Heading>
-        <Text className="opacity-80 leading-relaxed">
-          Couture made personal. Reach out for sizing help, preorder timelines,
-          or bespoke requests. Call us at{' '}
-          <a href="tel:+17785866660" className="border-b border-primary/40">
-            778-586-6660
-          </a>{' '}
-          or use the form below for concierge support.
-        </Text>
       </header>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,260px)_1fr]">
@@ -132,11 +121,6 @@ export default function ContactPage() {
             </Text>
             <Text as="p" className="text-xl font-semibold tracking-tight">
               relations@valcee.com
-            </Text>
-            <Text as="p" className="text-sm opacity-80 leading-relaxed">
-              Configure this alias with your mail provider and add the address
-              to the <code>CONTACT_FORWARD_EMAIL</code> env variable so
-              submissions reach your team automatically.
             </Text>
           </div>
 
@@ -163,8 +147,7 @@ export default function ContactPage() {
                 Legacy inbox
               </Text>
               <Text as="p" className="text-base">
-                coutureValcee@gmail.com — use the form or preferred inbox for
-                fastest routing.
+                coutureValcee@gmail.com
               </Text>
             </div>
           </div>
