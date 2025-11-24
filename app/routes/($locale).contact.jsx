@@ -98,98 +98,56 @@ export default function ContactPage() {
   return (
     <Section
       padding="none"
-      className="px-4 md:px-8 max-w-4xl mx-auto py-10 sm:py-14 space-y-10"
+      className="flex items-center justify-center min-h-[70vh] px-6 py-12"
     >
-      <header className="space-y-4 text-center sm:text-left">
-        <Heading
-          as="h1"
-          size="display"
-          className="text-4xl sm:text-5xl tracking-tight uppercase"
-        >
+      <div className="w-full max-w-md rounded-3xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-8 py-12 space-y-8">
+        <h1 className="text-center text-sm uppercase tracking-[0.3em] text-primary/60 font-light">
           Contact
-        </Heading>
-      </header>
+        </h1>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,260px)_1fr]">
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-6 py-5 space-y-2">
-            <Text
-              as="p"
-              className="text-xs uppercase tracking-[0.3em] text-primary/60"
-            >
-              Preferred inbox
-            </Text>
-            <Text as="p" className="text-xl font-semibold tracking-tight">
-              relations@valcee.com
-            </Text>
-          </div>
-
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-6 py-5 space-y-3">
-            <div>
-              <Text
-                as="p"
-                className="text-xs uppercase tracking-[0.3em] text-primary/60"
-              >
-                Studio hours
-              </Text>
-              <Text as="p" className="text-base">
-                Mon – Fri, 10 AM – 6 PM (PST)
-              </Text>
-              <Text as="p" className="text-base">
-                Weekends by appointment
-              </Text>
-            </div>
-            <div className="pt-3 border-t border-primary/10">
-              <Text
-                as="p"
-                className="text-xs uppercase tracking-[0.3em] text-primary/60"
-              >
-                Legacy inbox
-              </Text>
-              <Text as="p" className="text-base">
-                coutureValcee@gmail.com
-              </Text>
-            </div>
-          </div>
+        <div className="space-y-4 text-center">
+          <a 
+            href="mailto:relations@valcee.com"
+            className="block text-lg font-medium tracking-tight hover:text-primary/70 transition-colors"
+          >
+            relations@valcee.com
+          </a>
+          <p className="text-xs text-primary/50 uppercase tracking-wider">
+            Mon – Fri, 10 AM – 6 PM (PST)
+          </p>
         </div>
 
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-8 py-8 space-y-6">\n          <Form method="post" className="grid gap-4">
-            <Input
-              name="name"
-              placeholder="Your name"
-              required
-              className="w-full"
-            />
-            <Input
-              name="email"
-              type="email"
-              placeholder="Your email"
-              required
-              className="w-full"
-            />
-            <Input
-              name="topic"
-              placeholder="Topic (order status, preorder, styling...)"
-              className="w-full"
-            />
-            <textarea
-              name="message"
-              placeholder="How can we help?"
-              required
-              className="min-h-[160px] rounded-xl bg-primary/[0.02] border border-primary/20 px-4 py-3 focus:ring-2 focus:ring-primary/30 focus:border-primary/40 focus:outline-none transition-all"
-            />
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="tap uppercase tracking-[0.3em] text-xs sm:text-sm border border-primary/30 hover:border-primary/50 rounded-lg px-8 py-3.5 w-full sm:w-auto sm:justify-self-start transition-all hover:bg-primary/5"
-            >
-              {isSubmitting ? 'Sending…' : 'Send'}
-            </button>
-            {statusMessage && (
-              <Text className="text-sm opacity-80">{statusMessage}</Text>
-            )}
-          </Form>
-        </div>
+        <Form method="post" className="space-y-4">
+          <Input
+            name="name"
+            placeholder="Name"
+            required
+            className="w-full rounded-full"
+          />
+          <Input
+            name="email"
+            type="email"
+            placeholder="Email"
+            required
+            className="w-full rounded-full"
+          />
+          <textarea
+            name="message"
+            placeholder="Message"
+            required
+            className="w-full min-h-[120px] rounded-2xl bg-primary/[0.02] border border-primary/20 px-5 py-3 focus:ring-2 focus:ring-primary/30 focus:border-primary/40 focus:outline-none transition-all resize-none"
+          />
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full rounded-full py-3 bg-primary text-contrast hover:bg-primary/90 transition-colors text-sm uppercase tracking-wider font-medium"
+          >
+            {isSubmitting ? 'Sending…' : 'Send'}
+          </button>
+          {statusMessage && (
+            <p className="text-xs text-center text-primary/60">{statusMessage}</p>
+          )}
+        </Form>
       </div>
     </Section>
   );
