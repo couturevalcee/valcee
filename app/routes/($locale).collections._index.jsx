@@ -120,10 +120,15 @@ export default function Collections() {
     const snapClass = 'snap-y-mandatory';
     if (zoomLevel === 1) {
       html.classList.add(snapClass);
+      html.style.scrollPaddingTop = 'var(--collections-header-height)';
     } else {
       html.classList.remove(snapClass);
+      html.style.scrollPaddingTop = '';
     }
-    return () => html.classList.remove(snapClass);
+    return () => {
+      html.classList.remove(snapClass);
+      html.style.scrollPaddingTop = '';
+    };
   }, [zoomLevel]);
 
   // Measure header + bottom icons heights; derive product viewport height for single view
@@ -217,12 +222,12 @@ export default function Collections() {
             prefetch="intent"
             className={`group relative transition-all duration-500 ${
               zoomLevel === 1 
-                ? 'snap-center h-[var(--product-viewport-height)] flex flex-col items-center justify-center w-full' 
+                ? 'snap-start h-[var(--product-viewport-height)] flex flex-col items-center justify-center w-full' 
                 : 'flex flex-col items-start justify-start'
             }`}
           >
             {/* Unified Card Content */}
-            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-2' : 'gap-3'}`}>
+            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-2 pb-12' : 'gap-3'}`}>
               <div className={`${zoomLevel === 1 ? 'w-full flex items-center justify-center' : 'w-full aspect-[4/5]'} overflow-hidden rounded-2xl`}>
                 {product.featuredImage && (
                   <Image
