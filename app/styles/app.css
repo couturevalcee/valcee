@@ -247,13 +247,17 @@ shop-pay-button {
   /* Vertical snap container used on collections single-view.
      Keep physics native: mandatory snap + explicit padding vars.
      Avoid scroll-behavior smooth here to prevent double-step corrections. */
-  .snap-y-mandatory {
+  /* Collections immersive internal scroller (not document-level). */
+  .collections-scroll {
+    height: var(--collections-viewport, 100vh);
+    overflow-y: auto;
     scroll-snap-type: y mandatory;
-    scroll-padding-top: var(--total-top-offset, 0px);
-    scroll-padding-bottom: var(--bottom-icons-height, 0px);
+    scroll-padding-top: 0;
+    -webkit-overflow-scrolling: touch;
   }
-  .snap-y-mandatory::-webkit-scrollbar { display: none; }
-  .snap-y-mandatory { -ms-overflow-style: none; scrollbar-width: none; }
+  .collections-scroll::-webkit-scrollbar { display: none; }
+  .collections-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+  .collection-panel { scroll-snap-align: center; }
 
   .text-accent {
     color: rgb(var(--color-accent));

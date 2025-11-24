@@ -1,7 +1,7 @@
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {Image, getSeoMeta} from '@shopify/hydrogen';
-import {useState, useMemo, useEffect, useLayoutEffect} from 'react';
+import {useState, useMemo, useEffect, useLayoutEffect, useRef} from 'react';
 import {Link} from '~/components/Link';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
@@ -82,7 +82,8 @@ export const meta = ({matches}) => {
 export default function Collections() {
   const {collections, products} = useLoaderData();
   const [activeFilter, setActiveFilter] = useState('all');
-  const [zoomLevel, setZoomLevel] = useState(1); // Default columns
+  const [mode, setMode] = useState('immersive'); // 'immersive' | 'grid'
+  const scrollerRef = useRef(null);
 
   // Filter products based on selected collection
   const filteredProducts = useMemo(() => {
@@ -106,22 +107,39 @@ export default function Collections() {
   // Filter out 'home-page' collection from the list
   const visibleCollections = collections.filter(c => !['home-page', 'homepage', 'frontpage'].includes(c.handle));
 
-  // Reset scroll when view or filter changes (instant to avoid physics conflict)
+  // Reset internal scroll when mode or filter changes
   useEffect(() => {
-    window.scrollTo({top: 0, behavior: 'auto'});
-  }, [zoomLevel, activeFilter]);
+    if (scrollerRef.current) scrollerRef.current.scrollTo({top: 0, behavior: 'auto'});
+  }, [mode, activeFilter]);
 
-  // Enable scroll snapping for single view (mandatory snap physics)
-  useEffect(() => {
-    const html = document.documentElement;
-    const snapClass = 'snap-y-mandatory';
-    if (zoomLevel === 1) {
-      html.classList.add(snapClass);
-    } else {
-      html.classList.remove(snapClass);
+  // Set viewport height variable for internal scroller
+  useLayoutEffect(() => {
+    function measure() {
+      const nav = document.querySelector('header');
+      const header = document.getElementById('collectionsHeader');
+      const bottom = document.getElementById('bottomIcons');
+      const navH = nav?.getBoundingClientRect().height || 0;
+      const headerH = header?.getBoundingClientRect().height || 0;
+      const bottomH = bottom?.getBoundingClientRect().height || 0;
+      const viewport = window.innerHeight - navH - headerH - bottomH;
+      document.documentElement.style.setProperty('--collections-viewport', `${Math.max(viewport, 360)}px`);
     }
-    return () => html.classList.remove(snapClass);
-  }, [zoomLevel]);
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
+
+  // Fade panels in when intersecting for subtle polish
+  useEffect(() => {
+    if (mode !== 'immersive' || !scrollerRef.current) return;
+    const panels = scrollerRef.current.querySelectorAll('.collection-panel');
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('opacity-100')),
+      {root: scrollerRef.current, threshold: 0.6},
+    );
+    panels.forEach((p) => io.observe(p));
+    return () => io.disconnect();
+  }, [mode, filteredProducts]);
 
   // Measure nav + header + bottom; derive precise product viewport height
   useLayoutEffect(() => {
@@ -147,101 +165,57 @@ export default function Collections() {
   }, []);
 
   return (
-    <div className={`px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col ${zoomLevel === 1 ? 'min-h-screen' : ''}`}>
-      
-      {/* Controls Header: Filter & Zoom */}
-      <div id="collectionsHeader" className="sticky top-[var(--height-nav)] z-30 bg-contrast/95 backdrop-blur-md pt-6 pb-2 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col gap-2 transition-all duration-300">
-        
-        {/* Filter (Horizontal Scrollable Pills) */}
-        <div className="w-full overflow-x-auto hiddenScroll flex items-center gap-2 pb-1">
-          <button
-            onClick={() => setActiveFilter('all')}
-            className={`flex-shrink-0 px-4 py-2 rounded-full text-xs uppercase tracking-widest transition-all duration-300 ${
-              activeFilter === 'all'
-                ? 'bg-primary text-contrast shadow-md'
-                : 'bg-primary/5 text-primary/70 hover:bg-primary/10'
-            }`}
-          >
-            All
-          </button>
-          {visibleCollections.map((collection) => (
-            <button
-              key={collection.id}
-              onClick={() => setActiveFilter(collection.handle)}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-xs uppercase tracking-widest transition-all duration-300 ${
-                activeFilter === collection.handle
-                  ? 'bg-primary text-contrast shadow-md'
-                  : 'bg-primary/5 text-primary/70 hover:bg-primary/10'
-              }`}
-            >
-              {collection.title}
-            </button>
-          ))}
-        </div>
-
-        {/* View Toggle (Simple Icons) */}
-        <div className="flex items-center justify-end gap-4 border-t border-primary/5 pt-0.5">
-          <span className="text-[10px] uppercase tracking-widest opacity-40">Layout</span>
-          <div className="flex items-center gap-2 bg-primary/5 rounded-full p-1">
-            <button 
-              onClick={() => setZoomLevel(1)}
-              className={`p-2 rounded-full transition-all ${zoomLevel === 1 ? 'bg-primary text-contrast shadow-sm' : 'text-primary/40'}`}
-              aria-label="Single column view"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="4" y="4" width="16" height="16" rx="2" />
-              </svg>
-            </button>
-            <button 
-              onClick={() => setZoomLevel(2)}
-              className={`p-2 rounded-full transition-all ${zoomLevel === 2 ? 'bg-primary text-contrast shadow-sm' : 'text-primary/40'}`}
-              aria-label="Grid view"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-            </button>
+    <div className="px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col">
+      <div id="collectionsHeader" className="sticky top-[var(--height-nav)] z-30 bg-contrast/95 backdrop-blur-md pt-6 pb-3 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col gap-4">
+        <div className="flex items-center justify-between w-full">
+          <div className="flex-1 overflow-x-auto hiddenScroll flex items-center gap-2 pr-4">
+            <FilterPill label="All" active={activeFilter==='all'} onClick={()=>setActiveFilter('all')} />
+            {visibleCollections.map((c) => (
+              <FilterPill key={c.id} label={c.title} active={activeFilter===c.handle} onClick={()=>setActiveFilter(c.handle)} />
+            ))}
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-2 border-l border-primary/10 pl-3">
+            <ViewToggle active={mode==='immersive'} onClick={()=>setMode('immersive')} icon="single" />
+            <ViewToggle active={mode==='grid'} onClick={()=>setMode('grid')} icon="grid" />
           </div>
         </div>
       </div>
 
-      {/* Product Grid */}
-      <div 
-        className={`${zoomLevel === 1 ? 'flex flex-col' : 'grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8'}`}
-      >
-        {filteredProducts.map((product) => (
-          <Link
-            key={product.id}
-            to={`/products/${product.handle}`}
-            prefetch="intent"
-            className={`group relative ${zoomLevel === 1 ? 'snap-center h-[var(--product-viewport-height)] flex flex-col items-center justify-center w-full my-2' : 'flex flex-col items-start justify-start w-full'}`}
-          >
-            {/* Unified Card Content */}
-            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-3' : 'gap-3'}`}>
-              <div className={`${zoomLevel === 1 ? 'w-full flex items-center justify-center h-[80%]' : 'w-full aspect-[4/5]'} overflow-hidden rounded-2xl`}>
+      {mode==='immersive' ? (
+        <div ref={scrollerRef} className="collections-scroll flex flex-col">
+          {filteredProducts.map((product) => (
+            <Link key={product.id} to={`/products/${product.handle}`} prefetch="intent" className="collection-panel opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center w-full px-2">
+              <div className="flex flex-col items-center justify-center w-full max-w-[92vw] gap-4">
+                <div className="w-full flex items-center justify-center h-[80%] overflow-hidden rounded-2xl">
+                  {product.featuredImage && (
+                    <Image data={product.featuredImage} sizes="(min-width: 48em) 40vw, 90vw" className="max-h-[65vh] w-auto object-contain drop-shadow-xl transition-transform duration-500 ease-out group-hover:scale-105" />
+                  )}
+                </div>
+                <div className="flex flex-col items-center gap-1 mt-2">
+                  <span className="text-primary text-sm font-medium tracking-widest uppercase">{product.title}</span>
+                  <span className="text-primary/60 text-xs tracking-wider">{product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 pt-6">
+          {filteredProducts.map((product) => (
+            <Link key={product.id} to={`/products/${product.handle}`} prefetch="intent" className="flex flex-col items-start justify-start w-full group">
+              <div className="w-full aspect-[4/5] overflow-hidden rounded-xl bg-primary/5">
                 {product.featuredImage && (
-                  <Image
-                    data={product.featuredImage}
-                    sizes="(min-width: 45em) 20vw, 50vw"
-                    className={`${zoomLevel === 1 ? 'max-h-[65vh] w-auto object-contain drop-shadow-xl' : 'w-full h-full object-contain'} transition-transform duration-500 ease-out group-hover:scale-105`}
-                  />
+                  <Image data={product.featuredImage} sizes="(min-width: 64em) 22vw, (min-width:48em) 28vw, 50vw" className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105" />
                 )}
               </div>
-              <div className="flex flex-col items-center gap-1 mt-2">
-                <span className="text-primary text-sm font-medium tracking-widest uppercase">
-                  {product.title}
-                </span>
-                <span className="text-primary/60 text-xs tracking-wider">
-                  {product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}
-                </span>
+              <div className="flex flex-col items-start gap-1 mt-2">
+                <span className="text-primary text-sm font-medium tracking-wide group-hover:underline decoration-primary/30 underline-offset-4">{product.title}</span>
+                <span className="text-primary/60 text-xs tracking-wider">{product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}</span>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+            </Link>
+          ))}
+        </div>
+      )}
 
       {filteredProducts.length === 0 && (
         <div className="flex items-center justify-center h-64 opacity-50">
@@ -279,6 +253,46 @@ function CollectionCard({collection, loading}) {
         {collection.title}
       </Heading>
     </Link>
+  );
+}
+
+function FilterPill({label, active, onClick}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex-shrink-0 px-4 py-2 rounded-full text-[11px] font-medium uppercase tracking-widest transition-all duration-200 border ${
+        active
+          ? 'bg-primary text-contrast border-primary shadow-sm scale-105'
+          : 'bg-transparent text-primary/60 border-primary/10 hover:border-primary/30 hover:text-primary'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function ViewToggle({active, onClick, icon}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`p-2 rounded-md transition-colors duration-200 ${
+        active ? 'bg-primary/10 text-primary' : 'text-primary/40 hover:text-primary/70'
+      }`}
+      aria-label={icon === 'single' ? 'Immersive View' : 'Grid View'}
+    >
+      {icon === 'single' ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="5" y="4" width="14" height="16" rx="2" />
+        </svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+      )}
+    </button>
   );
 }
 
