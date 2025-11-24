@@ -220,19 +220,17 @@ export default function Authenticated() {
         ) : (
           /* Main account page */
           <div className="px-4 py-8">
-            <header className="flex items-center justify-between mb-8">
-              <div>
-                <h1 className="text-2xl font-medium tracking-tight mb-1">
-                  {data.customer?.firstName ? `${data.customer.firstName}'s Account` : 'My Account'}
-                </h1>
-                <p className="text-xs text-primary/40">
-                  {data.customer?.emailAddress?.emailAddress}
-                </p>
-              </div>
+            <header className="mb-8">
+              <h1 className="text-2xl font-medium tracking-tight mb-1">
+                {data.customer?.firstName ? `${data.customer.firstName}'s Account` : 'My Account'}
+              </h1>
+              <p className="text-xs text-primary/40 mb-3">
+                {data.customer?.emailAddress?.emailAddress}
+              </p>
               <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
                 <button 
                   type="submit" 
-                  className="text-[10px] text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
+                  className="text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
                 >
                   Sign out
                 </button>
