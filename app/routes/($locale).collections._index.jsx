@@ -1,7 +1,7 @@
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {Image, getSeoMeta} from '@shopify/hydrogen';
-import {useState, useMemo, useLayoutEffect} from 'react';
+import {useState, useMemo} from 'react';
 import {Link} from '~/components/Link';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
@@ -103,12 +103,9 @@ export default function Collections() {
 
   // Simple, no scroll physics JS – keep native behavior.
 
-  // Measure nav + header + bottom; derive precise product viewport height
-  // Removed dynamic measurement logic as no longer needed for simplified layout.
-
   return (
     <div className="px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-8 py-8">
-      <header id="collectionsHeader" className="flex flex-col gap-6">
+      <header id="collectionsHeader" className="sticky top-[var(--height-nav)] bg-contrast/95 backdrop-blur-sm z-10 flex flex-col gap-6 py-4 -mx-4 px-4 md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <FilterPill label="All" active={activeFilter==='all'} onClick={()=>setActiveFilter('all')} />
           {visibleCollections.map(c => (
@@ -153,29 +150,6 @@ export default function Collections() {
  *   loading?: HTMLImageElement['loading'];
  * }}
  */
-function CollectionCard({collection, loading}) {
-  return (
-    <Link
-      prefetch="viewport"
-      to={`/collections/${collection.handle}`}
-      className="grid gap-4"
-    >
-      <div className="card-image bg-primary/5 aspect-[3/2]">
-        {collection?.image && (
-          <Image
-            data={collection.image}
-            aspectRatio="6/4"
-            sizes="(max-width: 32em) 100vw, 45vw"
-            loading={loading}
-          />
-        )}
-      </div>
-      <Heading as="h3" size="copy">
-        {collection.title}
-      </Heading>
-    </Link>
-  );
-}
 
 function FilterPill({label, active, onClick}) {
   return (
@@ -189,43 +163,6 @@ function FilterPill({label, active, onClick}) {
 }
 
 // Removed LayoutToggle component; single layout only.
-
-const COLLECTIONS_QUERY = `#graphql
-  query Collections(
-    $country: CountryCode
-    $language: LanguageCode
-    $first: Int
-    $last: Int
-    $startCursor: String
-    $endCursor: String
-  ) @inContext(country: $country, language: $language) {
-    collections(first: $first, last: $last, before: $startCursor, after: $endCursor) {
-      nodes {
-        id
-        title
-        description
-        handle
-        seo {
-          description
-          title
-        }
-        image {
-          id
-          url
-          width
-          height
-          altText
-        }
-      }
-      pageInfo {
-        hasPreviousPage
-        hasNextPage
-        startCursor
-        endCursor
-      }
-    }
-  }
-`;
 
 /** @typedef {import('@shopify/remix-oxygen').MetaArgs} MetaArgs */
 /** @typedef {import('@shopify/remix-oxygen').LoaderFunctionArgs} LoaderFunctionArgs */
