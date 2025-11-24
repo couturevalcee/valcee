@@ -50,7 +50,7 @@ export function ProductCard({
       {product.__placeholder ? (
         <div>
           <div className={clsx('grid gap-4', className)}>
-            <div className="card-image aspect-[4/5] bg-primary/5">
+            <div className="card-image aspect-[4/5]">
               {image ? (
                 <Image
                   className="object-cover w-full h-full fadeIn opacity-95"
@@ -106,7 +106,7 @@ export function ProductCard({
           prefetch="viewport"
         >
           <div className={clsx('grid gap-4', className)}>
-            <div className="card-image aspect-[4/5] bg-primary/5">
+            <div className="card-image aspect-[4/5]">
               {image ? (
                 <Image
                   className="object-cover w-full h-full fadeIn opacity-95"

@@ -1,7 +1,7 @@
 import {json} from '@shopify/remix-oxygen';
 import {useLoaderData} from '@remix-run/react';
 import {Image, getSeoMeta} from '@shopify/hydrogen';
-import {useState, useMemo, useEffect, useLayoutEffect, useRef} from 'react';
+import {useState, useMemo, useLayoutEffect} from 'react';
 import {Link} from '~/components/Link';
 import {seoPayload} from '~/lib/seo.server';
 import {routeHeaders} from '~/data/cache';
@@ -82,146 +82,67 @@ export const meta = ({matches}) => {
 export default function Collections() {
   const {collections, products} = useLoaderData();
   const [activeFilter, setActiveFilter] = useState('all');
-  const [mode, setMode] = useState('immersive'); // 'immersive' | 'grid'
-  const scrollerRef = useRef(null);
+  // Single unified layout; removed compact option as redundant.
 
   // Filter products based on selected collection
   const filteredProducts = useMemo(() => {
-    let result = products;
-    if (activeFilter !== 'all') {
-      result = products.filter((product) =>
-        product.collections.nodes.some((c) => c.handle === activeFilter)
-      );
-    }
-    
-    // Sort featured products to the top
-    return [...result].sort((a, b) => {
-      const aFeatured = a.tags?.includes('featured') || false;
-      const bFeatured = b.tags?.includes('featured') || false;
-      if (aFeatured && !bFeatured) return -1;
-      if (!aFeatured && bFeatured) return 1;
+    const base = activeFilter === 'all'
+      ? products
+      : products.filter(p => p.collections.nodes.some(c => c.handle === activeFilter));
+    return [...base].sort((a,b) => {
+      const af = a.tags?.includes('featured');
+      const bf = b.tags?.includes('featured');
+      if (af && !bf) return -1;
+      if (!af && bf) return 1;
       return 0;
     });
   }, [activeFilter, products]);
 
   // Filter out 'home-page' collection from the list
-  const visibleCollections = collections.filter(c => !['home-page', 'homepage', 'frontpage'].includes(c.handle));
+  const visibleCollections = collections.filter(c => !['home-page','homepage','frontpage'].includes(c.handle));
 
-  // Reset internal scroll when mode or filter changes
-  useEffect(() => {
-    if (scrollerRef.current) scrollerRef.current.scrollTo({top: 0, behavior: 'auto'});
-  }, [mode, activeFilter]);
-
-  // Set viewport height variable for internal scroller
-  useLayoutEffect(() => {
-    function measure() {
-      const nav = document.querySelector('header');
-      const header = document.getElementById('collectionsHeader');
-      const bottom = document.getElementById('bottomIcons');
-      const navH = nav?.getBoundingClientRect().height || 0;
-      const headerH = header?.getBoundingClientRect().height || 0;
-      const bottomH = bottom?.getBoundingClientRect().height || 0;
-      const viewport = window.innerHeight - navH - headerH - bottomH;
-      document.documentElement.style.setProperty('--collections-viewport', `${Math.max(viewport, 360)}px`);
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
-
-  // Fade panels in when intersecting for subtle polish
-  useEffect(() => {
-    if (mode !== 'immersive' || !scrollerRef.current) return;
-    const panels = scrollerRef.current.querySelectorAll('.collection-panel');
-    const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('opacity-100')),
-      {root: scrollerRef.current, threshold: 0.6},
-    );
-    panels.forEach((p) => io.observe(p));
-    return () => io.disconnect();
-  }, [mode, filteredProducts]);
+  // Simple, no scroll physics JS – keep native behavior.
 
   // Measure nav + header + bottom; derive precise product viewport height
-  useLayoutEffect(() => {
-    function measure() {
-      const navEl = document.querySelector('header');
-      const headerEl = document.getElementById('collectionsHeader');
-      const bottomEl = document.getElementById('bottomIcons');
-      const navH = navEl?.getBoundingClientRect().height || 0;
-      const headerH = headerEl?.getBoundingClientRect().height || 0;
-      const bottomH = bottomEl?.getBoundingClientRect().height || 0;
-      const totalTopOffset = navH + headerH;
-      const viewportH = window.innerHeight - totalTopOffset - bottomH;
-      const productViewport = Math.max(viewportH, 350); // clamp
-      const doc = document.documentElement;
-      doc.style.setProperty('--collections-header-height', `${Math.round(headerH)}px`);
-      doc.style.setProperty('--bottom-icons-height', `${Math.round(bottomH)}px`);
-      doc.style.setProperty('--total-top-offset', `${Math.round(totalTopOffset)}px`);
-      doc.style.setProperty('--product-viewport-height', `${Math.round(productViewport)}px`);
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
+  // Removed dynamic measurement logic as no longer needed for simplified layout.
 
   return (
-    <div className="px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col">
-      <div id="collectionsHeader" className="sticky top-[var(--height-nav)] z-30 bg-contrast/95 backdrop-blur-md pt-6 pb-3 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col gap-4">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex-1 overflow-x-auto hiddenScroll flex items-center gap-2 pr-4">
-            <FilterPill label="All" active={activeFilter==='all'} onClick={()=>setActiveFilter('all')} />
-            {visibleCollections.map((c) => (
-              <FilterPill key={c.id} label={c.title} active={activeFilter===c.handle} onClick={()=>setActiveFilter(c.handle)} />
-            ))}
-          </div>
-          <div className="flex-shrink-0 flex items-center gap-2 border-l border-primary/10 pl-3">
-            <ViewToggle active={mode==='immersive'} onClick={()=>setMode('immersive')} icon="single" />
-            <ViewToggle active={mode==='grid'} onClick={()=>setMode('grid')} icon="grid" />
-          </div>
-        </div>
-      </div>
-
-      {mode==='immersive' ? (
-        <div ref={scrollerRef} className="collections-scroll flex flex-col">
-          {filteredProducts.map((product) => (
-            <Link key={product.id} to={`/products/${product.handle}`} prefetch="intent" className="collection-panel opacity-0 transition-opacity duration-500 flex flex-col items-center justify-center w-full px-2">
-              <div className="flex flex-col items-center justify-center w-full max-w-[92vw] gap-4">
-                <div className="w-full flex items-center justify-center h-[80%] overflow-hidden rounded-2xl">
-                  {product.featuredImage && (
-                    <Image data={product.featuredImage} sizes="(min-width: 48em) 40vw, 90vw" className="max-h-[65vh] w-auto object-contain drop-shadow-xl transition-transform duration-500 ease-out group-hover:scale-105" />
-                  )}
-                </div>
-                <div className="flex flex-col items-center gap-1 mt-2">
-                  <span className="text-primary text-sm font-medium tracking-widest uppercase">{product.title}</span>
-                  <span className="text-primary/60 text-xs tracking-wider">{product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}</span>
-                </div>
-              </div>
-            </Link>
+    <div className="px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-8 py-8">
+      <header id="collectionsHeader" className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterPill label="All" active={activeFilter==='all'} onClick={()=>setActiveFilter('all')} />
+          {visibleCollections.map(c => (
+            <FilterPill key={c.id} label={c.title} active={activeFilter===c.handle} onClick={()=>setActiveFilter(c.handle)} />
           ))}
         </div>
-      ) : (
-        <div className="grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 pt-6">
-          {filteredProducts.map((product) => (
-            <Link key={product.id} to={`/products/${product.handle}`} prefetch="intent" className="flex flex-col items-start justify-start w-full group">
-              <div className="w-full aspect-[4/5] overflow-hidden rounded-xl bg-primary/5">
-                {product.featuredImage && (
-                  <Image data={product.featuredImage} sizes="(min-width: 64em) 22vw, (min-width:48em) 28vw, 50vw" className="w-full h-full object-contain transition-transform duration-500 ease-out group-hover:scale-105" />
+      </header>
+      <section>
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {filteredProducts.map(p => (
+            <Link key={p.id} to={`/products/${p.handle}`} prefetch="intent" className="group flex flex-col gap-2">
+              <div className="aspect-[4/5] w-full overflow-hidden rounded-xl">
+                {p.featuredImage && (
+                  <Image
+                    data={p.featuredImage}
+                    aspectRatio={'4/5'}
+                    sizes="(min-width: 64em) 20vw, (min-width:48em) 25vw, 50vw"
+                    className="w-full h-full object-contain transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                  />
                 )}
               </div>
-              <div className="flex flex-col items-start gap-1 mt-2">
-                <span className="text-primary text-sm font-medium tracking-wide group-hover:underline decoration-primary/30 underline-offset-4">{product.title}</span>
-                <span className="text-primary/60 text-xs tracking-wider">{product.priceRange.minVariantPrice.amount} {product.priceRange.minVariantPrice.currencyCode}</span>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium tracking-wide truncate">{p.title}</span>
+                <span className="text-xs text-primary/60 tracking-wider">{p.priceRange.minVariantPrice.amount} {p.priceRange.minVariantPrice.currencyCode}</span>
               </div>
             </Link>
           ))}
         </div>
-      )}
-
-      {filteredProducts.length === 0 && (
-        <div className="flex items-center justify-center h-64 opacity-50">
-          <span className="uppercase tracking-widest">No products found</span>
-        </div>
-      )}
+        {filteredProducts.length === 0 && (
+          <div className="flex items-center justify-center h-64 opacity-50">
+            <span className="uppercase tracking-widest text-sm">No products found</span>
+          </div>
+        )}
+      </section>
     </div>
   );
 }
@@ -260,41 +181,14 @@ function FilterPill({label, active, onClick}) {
   return (
     <button
       onClick={onClick}
-      className={`flex-shrink-0 px-4 py-2 rounded-full text-[11px] font-medium uppercase tracking-widest transition-all duration-200 border ${
-        active
-          ? 'bg-primary text-contrast border-primary shadow-sm scale-105'
-          : 'bg-transparent text-primary/60 border-primary/10 hover:border-primary/30 hover:text-primary'
-      }`}
+      className={`px-4 py-1.5 rounded-full text-[11px] font-medium uppercase tracking-widest transition-colors duration-150 border ${active ? 'bg-primary text-contrast border-primary' : 'bg-transparent text-primary/60 border-primary/20 hover:text-primary hover:border-primary/40'}`}
     >
       {label}
     </button>
   );
 }
 
-function ViewToggle({active, onClick, icon}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`p-2 rounded-md transition-colors duration-200 ${
-        active ? 'bg-primary/10 text-primary' : 'text-primary/40 hover:text-primary/70'
-      }`}
-      aria-label={icon === 'single' ? 'Immersive View' : 'Grid View'}
-    >
-      {icon === 'single' ? (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="5" y="4" width="14" height="16" rx="2" />
-        </svg>
-      ) : (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="3" width="7" height="7" rx="1" />
-          <rect x="14" y="3" width="7" height="7" rx="1" />
-          <rect x="3" y="14" width="7" height="7" rx="1" />
-          <rect x="14" y="14" width="7" height="7" rx="1" />
-        </svg>
-      )}
-    </button>
-  );
-}
+// Removed LayoutToggle component; single layout only.
 
 const COLLECTIONS_QUERY = `#graphql
   query Collections(
