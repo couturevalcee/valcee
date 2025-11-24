@@ -5,15 +5,12 @@ import {
   useLoaderData,
   useMatches,
   useOutlet,
-  NavLink,
 } from '@remix-run/react';
 import {Suspense} from 'react';
 import {defer, redirect} from '@shopify/remix-oxygen';
-import {flattenConnection, Image} from '@shopify/hydrogen';
-import {Heading, PageHeader, Text} from '~/components/Text';
-import {Button} from '~/components/Button';
+import {flattenConnection} from '@shopify/hydrogen';
 import {Modal} from '~/components/Modal';
-import {statusMessage, usePrefixPathWithLocale} from '~/lib/utils';
+import {usePrefixPathWithLocale} from '~/lib/utils';
 import {CACHE_NONE, routeHeaders} from '~/data/cache';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 
@@ -132,10 +129,22 @@ export default function Authenticated() {
     return handle?.renderInModal;
   });
 
+  // Get modal title and size from route handle
+  const modalConfig = matches.reduce((acc, match) => {
+    const handle = match?.handle;
+    if (handle?.renderInModal) {
+      return {
+        title: handle.modalTitle || getModalTitle(match.pathname),
+        size: handle.modalSize || 'lg',
+      };
+    }
+    return acc;
+  }, {title: '', size: 'lg'});
+
   if (renderOutletInModal) {
     return (
       <>
-        <Modal cancelLink="/account">
+        <Modal cancelLink="/account" title={modalConfig.title} size={modalConfig.size}>
           <Outlet context={{
             customer: data.customer, 
             featuredDataPromise: data.featuredDataPromise,
@@ -150,62 +159,48 @@ export default function Authenticated() {
   return <AccountLayout data={data} />;
 }
 
+function getModalTitle(pathname) {
+  if (pathname.includes('/orders')) return 'Orders';
+  if (pathname.includes('/wishlist')) return 'Wishlist';
+  if (pathname.includes('/settings')) return 'Settings';
+  if (pathname.includes('/edit')) return 'Edit Profile';
+  if (pathname.includes('/address')) return 'Address';
+  if (pathname.includes('/contact')) return 'Contact';
+  return '';
+}
+
 function AccountLayout({data}) {
   return (
-    <div className="px-4 py-8 md:px-8 lg:px-12">
-      <PageHeader heading={data.heading}>
+    <div className="px-4 py-8 md:px-8 lg:px-12 max-w-lg mx-auto">
+      <header className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-medium tracking-tight">
+            {data.customer?.firstName || 'Account'}
+          </h1>
+          <p className="text-sm text-primary/50 mt-0.5">
+            {data.customer?.emailAddress?.emailAddress}
+          </p>
+        </div>
         <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
-          <button type="submit" className="text-primary/50">
+          <button 
+            type="submit" 
+            className="text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
+          >
             Sign out
           </button>
         </Form>
-      </PageHeader>
+      </header>
 
-      <div className="grid md:grid-cols-[240px_1fr] gap-8 mt-8">
-        <nav className="hidden md:block">
-          <AccountMenu />
-        </nav>
-        <main>
-          <Outlet context={{
-            customer: data.customer, 
-            featuredDataPromise: data.featuredDataPromise,
-            wishlistProductsPromise: data.wishlistProductsPromise
-          }} />
-        </main>
-      </div>
+      <main>
+        <Outlet context={{
+          customer: data.customer, 
+          featuredDataPromise: data.featuredDataPromise,
+          wishlistProductsPromise: data.wishlistProductsPromise
+        }} />
+      </main>
     </div>
   );
 }
-
-function AccountMenu() {
-  const navItems = [
-    {to: '/account', title: 'Overview', end: true},
-    {to: '/account/orders', title: 'Orders'},
-    {to: '/account/wishlist', title: 'Wishlist'},
-    {to: '/account/profile', title: 'Profile'},
-    {to: '/account/contact', title: 'Concierge'},
-  ];
-
-  return (
-    <div className="flex flex-col gap-2 sticky top-32">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.end}
-          className={({isActive}) =>
-            `px-4 py-2 rounded-lg transition-colors text-left ${
-              isActive ? 'bg-primary text-contrast' : 'hover:bg-primary/5'
-            }`
-          }
-        >
-          {item.title}
-        </NavLink>
-      ))}
-    </div>
-  );
-}
-
 
 /**
  * @typedef {{

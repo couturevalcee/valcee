@@ -5,9 +5,18 @@ import {Link} from '~/components/Link';
  * @param {{
  *   children: React.ReactNode;
  *   cancelLink: string;
+ *   title?: string;
+ *   size?: 'sm' | 'md' | 'lg' | 'xl';
  * }}
  */
-export function Modal({children, cancelLink}) {
+export function Modal({children, cancelLink, title, size = 'md'}) {
+  const sizeClasses = {
+    sm: 'sm:max-w-sm',
+    md: 'sm:max-w-md',
+    lg: 'sm:max-w-2xl',
+    xl: 'sm:max-w-4xl',
+  };
+
   return (
     <div
       className="relative z-50"
@@ -16,11 +25,11 @@ export function Modal({children, cancelLink}) {
       aria-modal="true"
       id="modal-bg"
     >
-      <div className="fixed inset-0 transition-opacity bg-opacity-75 bg-primary/40"></div>
+      <div className="fixed inset-0 transition-opacity bg-primary/60 backdrop-blur-sm"></div>
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex items-center justify-center min-h-full p-4 text-center sm:p-0">
           <div
-            className="relative flex-1 px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform rounded shadow-xl bg-contrast sm:my-12 sm:flex-none sm:w-full sm:max-w-sm sm:p-6"
+            className={`relative flex-1 w-full overflow-hidden text-left transition-all transform rounded-2xl shadow-2xl bg-contrast sm:my-8 sm:flex-none ${sizeClasses[size]}`}
             role="button"
             onClick={(e) => {
               e.stopPropagation();
@@ -30,15 +39,23 @@ export function Modal({children, cancelLink}) {
             }}
             tabIndex={0}
           >
-            <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-primary/10 bg-contrast">
+              {title && (
+                <h2 className="text-lg font-medium">{title}</h2>
+              )}
+              {!title && <div />}
               <Link
                 to={cancelLink}
-                className="p-4 -m-4 transition text-primary hover:text-primary/50"
+                className="p-2 -m-2 transition text-primary/60 hover:text-primary rounded-full hover:bg-primary/5"
               >
                 <IconClose aria-label="Close panel" />
               </Link>
             </div>
-            {children}
+            {/* Content */}
+            <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+              {children}
+            </div>
           </div>
         </div>
       </div>
