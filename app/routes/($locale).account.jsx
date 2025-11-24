@@ -150,19 +150,17 @@ export default function Authenticated() {
       <div className="hidden lg:block">
         <div className="max-w-7xl mx-auto px-8 py-16">
           {/* Header */}
-          <header className="flex items-center justify-between mb-12">
-            <div>
-              <h1 className="text-2xl font-medium tracking-tight mb-1">
-                {data.customer?.firstName ? `${data.customer.firstName}'s Account` : 'My Account'}
-              </h1>
-              <p className="text-xs text-primary/40">
-                {data.customer?.emailAddress?.emailAddress}
-              </p>
-            </div>
+          <header className="mb-12">
+            <h1 className="text-2xl font-medium tracking-tight mb-1">
+              {data.customer?.firstName ? `${data.customer.firstName}'s Account` : 'My Account'}
+            </h1>
+            <p className="text-xs text-primary/40 mb-3">
+              {data.customer?.emailAddress?.emailAddress}
+            </p>
             <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
               <button 
                 type="submit" 
-                className="px-4 py-2 text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest rounded-lg hover:bg-primary/5"
+                className="text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
               >
                 Sign out
               </button>

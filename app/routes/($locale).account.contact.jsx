@@ -136,7 +136,7 @@ export default function AccountContact() {
 
       {/* Message History */}
       <div>
-        <Text className="text-xs uppercase tracking-widest text-primary/40 mb-3">Message History</Text>
+        <h3 className="text-xs uppercase tracking-widest text-primary/40 mb-3">Message History</h3>
         {history.length > 0 ? (
           <div className="space-y-2">
             {history.slice(0, 3).map((msg) => (
@@ -150,7 +150,9 @@ export default function AccountContact() {
             ))}
           </div>
         ) : (
-          <Text size="fine" className="text-primary/40">No previous messages.</Text>
+          <div className="rounded-xl border border-dashed border-primary/10 bg-primary/[0.02] p-8 text-center">
+            <Text size="fine" className="text-primary/40">No previous messages.</Text>
+          </div>
         )}
       </div>
     </div>
