@@ -20,14 +20,17 @@ export default function AccountOrders() {
 
 function EmptyOrders() {
   return (
-    <div className="text-center py-12">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center">
-        <PackageIcon className="w-8 h-8 text-primary/25" />
+    <div className="flex flex-col items-center justify-center min-h-[400px] py-16">
+      <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/5 flex items-center justify-center">
+        <PackageIcon className="w-10 h-10 text-primary/25" />
       </div>
-      <Text className="text-primary/50 text-sm mb-6">No orders yet</Text>
+      <h3 className="text-lg font-medium mb-2">No orders yet</h3>
+      <Text className="text-primary/50 text-sm mb-8 max-w-xs text-center">
+        Your order history will appear here once you make your first purchase.
+      </Text>
       <Link
         to="/"
-        className="inline-block px-6 py-2.5 rounded-full border border-primary/20 text-sm font-medium hover:bg-primary hover:text-contrast transition-colors"
+        className="inline-block px-8 py-3 rounded-full bg-primary text-contrast text-sm font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow"
       >
         Start Shopping
       </Link>
