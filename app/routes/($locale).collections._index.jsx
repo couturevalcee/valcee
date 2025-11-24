@@ -104,8 +104,8 @@ export default function Collections() {
   // Simple, no scroll physics JS – keep native behavior.
 
   return (
-    <div className="px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-8 py-8">
-      <header id="collectionsHeader" className="sticky top-[var(--height-nav)] bg-contrast/95 backdrop-blur-sm z-10 flex flex-col gap-6 py-4 -mx-4 px-4 md:-mx-8 md:px-8">
+    <div className="px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col gap-4 py-4">
+      <header id="collectionsHeader" className="sticky top-[var(--height-nav)] bg-contrast/95 backdrop-blur-sm z-10 flex flex-col gap-3 py-3 -mx-4 px-4 md:-mx-8 md:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <FilterPill label="All" active={activeFilter==='all'} onClick={()=>setActiveFilter('all')} />
           {visibleCollections.map(c => (
@@ -114,9 +114,9 @@ export default function Collections() {
         </div>
       </header>
       <section>
-        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {filteredProducts.map(p => (
-            <Link key={p.id} to={`/products/${p.handle}`} prefetch="intent" className="group flex flex-col gap-2">
+            <Link key={p.id} to={`/products/${p.handle}`} prefetch="intent" className="group flex flex-col gap-1">
               <div className="aspect-[4/5] w-full overflow-hidden rounded-xl">
                 {p.featuredImage && (
                   <Image
