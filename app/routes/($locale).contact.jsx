@@ -112,7 +112,7 @@ export default function ContactPage() {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,260px)_1fr]">
         <div className="space-y-6">
-          <div className="rounded-xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-6 py-5 space-y-2 shadow-sm">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-6 py-5 space-y-2">
             <Text
               as="p"
               className="text-xs uppercase tracking-[0.3em] text-primary/60"
@@ -124,7 +124,7 @@ export default function ContactPage() {
             </Text>
           </div>
 
-          <div className="rounded-xl border border-primary/10 bg-contrast/95 backdrop-blur-sm px-6 py-5 space-y-3 shadow-sm">
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-6 py-5 space-y-3">
             <div>
               <Text
                 as="p"
@@ -153,8 +153,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-primary/10 bg-contrast/95 backdrop-blur-sm px-8 py-8 space-y-6 shadow-lg">
-          <Form method="post" className="grid gap-4">
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-sm px-8 py-8 space-y-6">\n          <Form method="post" className="grid gap-4">
             <Input
               name="name"
               placeholder="Your name"
