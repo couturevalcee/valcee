@@ -24,10 +24,7 @@ function EmptyOrders() {
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/5 flex items-center justify-center">
         <PackageIcon className="w-10 h-10 text-primary/25" />
       </div>
-      <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-      <Text className="text-primary/50 text-sm mb-8 max-w-xs text-center">
-        Your order history will appear here once you make your first purchase.
-      </Text>
+      <h3 className="text-lg font-medium mb-8">No orders yet</h3>
       <Link
         to="/"
         className="inline-block px-8 py-3 rounded-full bg-primary text-contrast text-sm font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow"

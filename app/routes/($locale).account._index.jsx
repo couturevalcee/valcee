@@ -79,10 +79,7 @@ export default function AccountOverview() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center">
             <PackageIcon className="w-8 h-8 text-primary/20" />
           </div>
-          <h3 className="text-base font-medium mb-2">Ready to start shopping?</h3>
-          <p className="text-sm text-primary/50 mb-6 max-w-sm mx-auto">
-            Discover our curated collection of timeless pieces designed for the modern woman.
-          </p>
+          <h3 className="text-base font-medium mb-6">Ready to start shopping?</h3>
           <Link
             to="/"
             className="inline-block px-8 py-3 rounded-full bg-primary text-contrast text-sm font-medium hover:bg-primary/90 transition-all"

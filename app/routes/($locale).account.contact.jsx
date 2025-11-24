@@ -89,10 +89,6 @@ export default function AccountContact() {
     <div className="space-y-6">
       {/* Contact Form */}
       <div>
-        <Text className="text-primary/70 text-sm mb-4">
-          Send us a message regarding your orders, styling advice, or any other inquiries.
-        </Text>
-        
         {actionData?.success ? (
           <div className="p-3 bg-green-500/10 text-green-700 rounded-xl mb-4 text-sm">
             Message sent successfully.

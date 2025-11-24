@@ -89,10 +89,7 @@ function EmptyWishlist() {
       <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/5 flex items-center justify-center">
         <HeartIcon className="w-10 h-10 text-primary/25" />
       </div>
-      <h3 className="text-lg font-medium mb-2">Your wishlist is empty</h3>
-      <Text className="text-primary/50 text-sm mb-8 max-w-xs text-center">
-        Save items you love by clicking the heart icon on any product.
-      </Text>
+      <h3 className="text-lg font-medium mb-8">Your wishlist is empty</h3>
       <Link
         to="/"
         className="inline-block px-8 py-3 rounded-full bg-primary text-contrast text-sm font-medium hover:bg-primary/90 transition-all shadow-sm hover:shadow"
