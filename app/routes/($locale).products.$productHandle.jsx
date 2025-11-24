@@ -183,6 +183,7 @@ export default function Product() {
           {/* Left: product imagery */}
           <div className="md:col-span-2 lg:col-span-1 flex flex-col gap-4 justify-center">
             <ProductGallery
+              key={product.id}
               media={media.nodes}
               className="w-full"
             />

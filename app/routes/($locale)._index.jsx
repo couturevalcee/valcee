@@ -94,7 +94,7 @@ export default function Homepage() {
   const imageMedia = featuredProduct?.featuredImage || null;
 
   return (
-    <main className="relative flex flex-col h-[100dvh] overflow-hidden bg-contrast text-primary">
+    <main className="fixed inset-0 flex flex-col overflow-hidden bg-contrast text-primary">
       {/* Immersive background layer */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         <video

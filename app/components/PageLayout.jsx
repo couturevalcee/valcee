@@ -73,8 +73,8 @@ export function PageLayout({children, layout}) {
         {/* Top Gradient Mask to feather header */}
         <div className="fixed top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-contrast via-contrast/80 to-transparent z-30 pointer-events-none" />
         
-        {/* Desktop-only solid header background to hide scrolling content behind logo */}
-        <div className="hidden md:block fixed top-0 left-0 right-0 h-[var(--height-nav)] bg-contrast z-20 pointer-events-none" />
+        {/* Solid header background to hide scrolling content behind logo */}
+        <div className="fixed top-0 left-0 right-0 h-[var(--height-nav)] bg-contrast z-20 pointer-events-none" />
       </div>
       {/* Footer removed site-wide */}
     </>
