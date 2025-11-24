@@ -23,7 +23,7 @@ export default function AccountWishlist() {
         <Await resolve={wishlistProductsPromise}>
           {(wishlistProducts) => (
             wishlistProducts && wishlistProducts.length ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2.5">
                 {wishlistProducts.map((product) => (
                   <WishlistItem 
                     key={product.id} 
@@ -47,9 +47,9 @@ function WishlistItem({product, wishlistIds}) {
   const price = variant?.price || product.priceRange?.minVariantPrice;
   
   return (
-    <div className="group relative rounded-xl border border-primary/10 overflow-hidden hover:border-primary/20 transition-colors">
+    <div className="group relative rounded-xl border border-primary/[0.08] overflow-hidden bg-contrast/30 hover:border-primary/15 transition-colors">
       {/* Remove button */}
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-1.5 right-1.5 z-10">
         <AddToWishlist productId={product.id} wishlistIds={wishlistIds} />
       </div>
       
@@ -63,20 +63,20 @@ function WishlistItem({product, wishlistIds}) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <HeartIcon className="w-8 h-8 text-primary/10" />
+            <HeartIcon className="w-6 h-6 text-primary/10" />
           </div>
         )}
       </Link>
       
       {/* Info */}
-      <div className="p-3">
+      <div className="p-2.5">
         <Link to={`/products/${product.handle}`}>
-          <Text className="text-sm font-medium line-clamp-1 hover:underline">
+          <Text className="text-xs font-medium line-clamp-1 hover:underline">
             {product.title}
           </Text>
         </Link>
         {price && (
-          <Text size="fine" className="text-primary/60">
+          <Text size="fine" className="text-primary/50 text-[10px]">
             {formatMoney(price)}
           </Text>
         )}
@@ -87,14 +87,14 @@ function WishlistItem({product, wishlistIds}) {
 
 function EmptyWishlist() {
   return (
-    <div className="text-center py-8">
-      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/5 flex items-center justify-center">
-        <HeartIcon className="w-8 h-8 text-primary/30" />
+    <div className="text-center py-6">
+      <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-primary/5 flex items-center justify-center">
+        <HeartIcon className="w-7 h-7 text-primary/25" />
       </div>
-      <Text className="text-primary/60 mb-4">Your wishlist is empty</Text>
+      <Text className="text-primary/50 text-sm mb-4">Your wishlist is empty</Text>
       <Link
         to={usePrefixPathWithLocale('/')}
-        className="inline-block px-6 py-2 rounded-full border border-primary/20 text-sm hover:bg-primary hover:text-contrast transition-colors"
+        className="inline-block px-5 py-2 rounded-full border border-primary/15 text-xs font-medium hover:bg-primary hover:text-contrast transition-colors"
       >
         Explore Products
       </Link>
@@ -104,13 +104,13 @@ function EmptyWishlist() {
 
 function WishlistSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-2 gap-2.5">
       {[...Array(4)].map((_, i) => (
-        <div key={i} className="rounded-xl border border-primary/10 overflow-hidden animate-pulse">
+        <div key={i} className="rounded-xl border border-primary/[0.08] overflow-hidden animate-pulse">
           <div className="aspect-square bg-primary/5" />
-          <div className="p-3 space-y-2">
-            <div className="h-4 bg-primary/10 rounded w-3/4" />
-            <div className="h-3 bg-primary/5 rounded w-1/2" />
+          <div className="p-2.5 space-y-1.5">
+            <div className="h-3 bg-primary/10 rounded w-3/4" />
+            <div className="h-2.5 bg-primary/5 rounded w-1/2" />
           </div>
         </div>
       ))}

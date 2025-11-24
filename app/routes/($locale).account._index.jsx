@@ -20,14 +20,14 @@ export default function AccountOverview() {
   } catch (e) {}
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 lg:space-y-6">
       {/* Active Orders Banner */}
       {activeOrders.length > 0 && (
         <ActiveOrdersBanner orders={activeOrders} />
       )}
 
       {/* Main Action Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 lg:gap-4">
         <ActionCard
           to="/account/orders"
           icon={<PackageIcon />}
@@ -36,7 +36,7 @@ export default function AccountOverview() {
         />
         <ActionCard
           to="/account/wishlist"
-          icon={<IconHeart className="w-6 h-6" />}
+          icon={<IconHeart className="w-5 h-5 lg:w-6 lg:h-6" />}
           label="Wishlist"
           count={wishlistCount}
         />
@@ -62,14 +62,14 @@ function ActionCard({to, icon, label, count}) {
   return (
     <Link
       to={to}
-      className="group relative flex flex-col items-center justify-center gap-3 rounded-2xl border border-primary/10 bg-contrast p-8 transition-all hover:border-primary/30 hover:shadow-md"
+      className="group relative flex flex-col items-center justify-center gap-2 lg:gap-3 rounded-2xl border border-primary/[0.08] bg-contrast/60 backdrop-blur-sm p-6 lg:p-8 transition-all hover:border-primary/20 hover:bg-contrast/80 hover:shadow-lg active:scale-[0.98]"
     >
-      <div className="text-primary/70 group-hover:text-primary transition-colors">
+      <div className="text-primary/60 group-hover:text-primary transition-colors">
         {icon}
       </div>
-      <span className="text-sm font-medium tracking-wide">{label}</span>
+      <span className="text-xs lg:text-sm font-medium tracking-wide text-primary/80">{label}</span>
       {typeof count === 'number' && count > 0 && (
-        <span className="absolute top-3 right-3 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-medium text-contrast">
+        <span className="absolute top-2.5 right-2.5 lg:top-3 lg:right-3 flex h-4 lg:h-5 min-w-4 lg:min-w-5 items-center justify-center rounded-full bg-primary/90 px-1 lg:px-1.5 text-[9px] lg:text-[10px] font-medium text-contrast">
           {count}
         </span>
       )}
@@ -86,16 +86,16 @@ function ActiveOrdersBanner({orders}) {
   return (
     <Link
       to="/account/orders"
-      className="block rounded-2xl border border-primary/10 bg-primary/[0.02] p-4 transition-all hover:border-primary/20"
+      className="block rounded-2xl border border-primary/[0.08] bg-contrast/50 backdrop-blur-sm p-3 lg:p-4 transition-all hover:border-primary/20 hover:bg-contrast/70"
     >
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 lg:gap-3">
+          <div className="flex h-9 w-9 lg:h-10 lg:w-10 items-center justify-center rounded-full bg-primary/10">
             <TruckIcon />
           </div>
           <div>
-            <Text className="text-sm font-medium">Order #{latestOrder.number}</Text>
-            <Text size="fine" className="text-primary/60">{statusLabel}</Text>
+            <Text className="text-xs lg:text-sm font-medium">Order #{latestOrder.number}</Text>
+            <Text size="fine" className="text-primary/50 text-[10px] lg:text-xs">{statusLabel}</Text>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ function ActiveOrdersBanner({orders}) {
               target="_blank"
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-contrast"
+              className="rounded-full bg-primary/90 px-2.5 lg:px-3 py-1 lg:py-1.5 text-[10px] lg:text-xs font-medium text-contrast"
             >
               Track
             </a>
@@ -114,7 +114,7 @@ function ActiveOrdersBanner({orders}) {
         </div>
       </div>
       {orders.length > 1 && (
-        <Text size="fine" className="mt-2 text-primary/50">
+        <Text size="fine" className="mt-2 text-primary/40 text-[10px]">
           +{orders.length - 1} more active order{orders.length > 2 ? 's' : ''}
         </Text>
       )}
@@ -127,7 +127,7 @@ function RecentPurchases({orders}) {
   if (!purchases.length) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5 lg:space-y-3">
       <div className="flex items-center justify-between">
         <Text className="text-sm font-medium text-primary/60 uppercase tracking-widest">Recent</Text>
         <Link to="/account/orders" className="text-xs text-primary/50 hover:text-primary">

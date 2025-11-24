@@ -141,17 +141,30 @@ export default function Authenticated() {
     return acc;
   }, {title: '', size: 'lg'});
 
+  // On desktop (lg+), render as side panel; on mobile, use modal
   if (renderOutletInModal) {
     return (
       <>
-        <Modal cancelLink="/account" title={modalConfig.title} size={modalConfig.size}>
-          <Outlet context={{
-            customer: data.customer, 
-            featuredDataPromise: data.featuredDataPromise,
-            wishlistProductsPromise: data.wishlistProductsPromise
-          }} />
-        </Modal>
-        <AccountLayout data={data} />
+        {/* Mobile: Modal */}
+        <div className="lg:hidden">
+          <Modal cancelLink="/account" title={modalConfig.title} size={modalConfig.size}>
+            <Outlet context={{
+              customer: data.customer, 
+              featuredDataPromise: data.featuredDataPromise,
+              wishlistProductsPromise: data.wishlistProductsPromise
+            }} />
+          </Modal>
+        </div>
+        {/* Desktop: Side-by-side layout */}
+        <div className="hidden lg:block">
+          <AccountLayoutDesktop data={data} modalTitle={modalConfig.title}>
+            <Outlet context={{
+              customer: data.customer, 
+              featuredDataPromise: data.featuredDataPromise,
+              wishlistProductsPromise: data.wishlistProductsPromise
+            }} />
+          </AccountLayoutDesktop>
+        </div>
       </>
     );
   }
@@ -165,16 +178,49 @@ function getModalTitle(pathname) {
   if (pathname.includes('/settings')) return 'Settings';
   if (pathname.includes('/edit')) return 'Edit Profile';
   if (pathname.includes('/address')) return 'Address';
-  if (pathname.includes('/contact')) return 'Contact';
+  if (pathname.includes('/contact')) return 'Help';
   return '';
 }
 
 function AccountLayout({data}) {
   return (
-    <div className="px-4 py-8 md:px-8 lg:px-12 max-w-lg mx-auto">
-      <header className="flex items-center justify-between mb-8">
+    <div className="px-4 py-6 md:px-8 lg:px-12 lg:py-12 max-w-lg lg:max-w-6xl mx-auto">
+      <header className="flex items-center justify-between mb-6 lg:mb-10">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">
+          <h1 className="text-xl lg:text-3xl font-medium tracking-tight">
+            {data.customer?.firstName || 'Account'}
+          </h1>
+          <p className="text-xs lg:text-sm text-primary/50 mt-0.5">
+            {data.customer?.emailAddress?.emailAddress}
+          </p>
+        </div>
+        <Form method="post" action={usePrefixPathWithLocale('/account/logout')}>
+          <button 
+            type="submit" 
+            className="text-[10px] lg:text-xs text-primary/40 hover:text-primary transition-colors uppercase tracking-widest"
+          >
+            Sign out
+          </button>
+        </Form>
+      </header>
+
+      <main>
+        <Outlet context={{
+          customer: data.customer, 
+          featuredDataPromise: data.featuredDataPromise,
+          wishlistProductsPromise: data.wishlistProductsPromise
+        }} />
+      </main>
+    </div>
+  );
+}
+
+function AccountLayoutDesktop({data, modalTitle, children}) {
+  return (
+    <div className="px-8 lg:px-12 py-12 max-w-6xl mx-auto">
+      <header className="flex items-center justify-between mb-10">
+        <div>
+          <h1 className="text-3xl font-medium tracking-tight">
             {data.customer?.firstName || 'Account'}
           </h1>
           <p className="text-sm text-primary/50 mt-0.5">
@@ -191,13 +237,32 @@ function AccountLayout({data}) {
         </Form>
       </header>
 
-      <main>
-        <Outlet context={{
-          customer: data.customer, 
-          featuredDataPromise: data.featuredDataPromise,
-          wishlistProductsPromise: data.wishlistProductsPromise
-        }} />
-      </main>
+      <div className="grid lg:grid-cols-[1fr_400px] gap-12">
+        {/* Left: Dashboard */}
+        <main>
+          <Outlet context={{
+            customer: data.customer, 
+            featuredDataPromise: data.featuredDataPromise,
+            wishlistProductsPromise: data.wishlistProductsPromise
+          }} />
+        </main>
+
+        {/* Right: Detail Panel */}
+        <aside className="lg:border-l lg:border-primary/10 lg:pl-12">
+          <div className="sticky top-24">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-medium">{modalTitle}</h2>
+              <a 
+                href="/account" 
+                className="text-xs text-primary/40 hover:text-primary uppercase tracking-widest"
+              >
+                Close
+              </a>
+            </div>
+            {children}
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
