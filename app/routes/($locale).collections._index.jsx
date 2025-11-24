@@ -106,50 +106,48 @@ export default function Collections() {
   // Filter out 'home-page' collection from the list
   const visibleCollections = collections.filter(c => !['home-page', 'homepage', 'frontpage'].includes(c.handle));
 
-  // Reset scroll when view or filter changes
+  // Reset scroll when view or filter changes (instant to avoid physics conflict)
   useEffect(() => {
-    const mainContent = document.getElementById('mainContent');
-    if (mainContent) {
-      mainContent.scrollTo({top: 0, behavior: 'smooth'});
-    }
+    window.scrollTo({top: 0, behavior: 'auto'});
   }, [zoomLevel, activeFilter]);
 
-  // Enable scroll snapping for single view
+  // Enable scroll snapping for single view (mandatory snap physics)
   useEffect(() => {
     const html = document.documentElement;
     const snapClass = 'snap-y-mandatory';
     if (zoomLevel === 1) {
       html.classList.add(snapClass);
-      html.style.scrollPaddingTop = 'var(--collections-header-height)';
-      html.style.scrollBehavior = 'auto'; // Disable smooth scroll to prevent conflict with snap
     } else {
       html.classList.remove(snapClass);
-      html.style.scrollPaddingTop = '';
-      html.style.scrollBehavior = '';
     }
-    return () => {
-      html.classList.remove(snapClass);
-      html.style.scrollPaddingTop = '';
-      html.style.scrollBehavior = '';
-    };
+    return () => html.classList.remove(snapClass);
   }, [zoomLevel]);
 
-  // Measure header + bottom icons heights; derive product viewport height for single view
+  // Measure nav + header + bottom; derive precise product viewport height
   useLayoutEffect(() => {
-    const headerEl = document.getElementById('collectionsHeader');
-    const bottomEl = document.getElementById('bottomIcons');
-    const headerH = headerEl?.getBoundingClientRect().height || 0;
-    const bottomH = bottomEl?.getBoundingClientRect().height || 0;
-    document.documentElement.style.setProperty('--collections-header-height', `${Math.round(headerH)}px`);
-    document.documentElement.style.setProperty('--bottom-icons-height', `${Math.round(bottomH)}px`);
-    const productViewport = Math.max(window.innerHeight - headerH - bottomH, 320); // clamp minimum
-    document.documentElement.style.setProperty('--product-viewport-height', `${Math.round(productViewport)}px`);
-  });
+    function measure() {
+      const navEl = document.querySelector('header');
+      const headerEl = document.getElementById('collectionsHeader');
+      const bottomEl = document.getElementById('bottomIcons');
+      const navH = navEl?.getBoundingClientRect().height || 0;
+      const headerH = headerEl?.getBoundingClientRect().height || 0;
+      const bottomH = bottomEl?.getBoundingClientRect().height || 0;
+      const totalTopOffset = navH + headerH;
+      const viewportH = window.innerHeight - totalTopOffset - bottomH;
+      const productViewport = Math.max(viewportH, 350); // clamp
+      const doc = document.documentElement;
+      doc.style.setProperty('--collections-header-height', `${Math.round(headerH)}px`);
+      doc.style.setProperty('--bottom-icons-height', `${Math.round(bottomH)}px`);
+      doc.style.setProperty('--total-top-offset', `${Math.round(totalTopOffset)}px`);
+      doc.style.setProperty('--product-viewport-height', `${Math.round(productViewport)}px`);
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
 
   return (
-    <div className={`px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col ${
-      zoomLevel === 1 ? 'min-h-screen pb-12' : ''
-    }`}>
+    <div className={`px-4 md:px-8 max-w-screen-xl mx-auto flex flex-col ${zoomLevel === 1 ? 'min-h-screen' : ''}`}>
       
       {/* Controls Header: Filter & Zoom */}
       <div id="collectionsHeader" className="sticky top-[var(--height-nav)] z-30 bg-contrast/95 backdrop-blur-md pt-6 pb-2 -mx-4 px-4 md:-mx-8 md:px-8 flex flex-col gap-2 transition-all duration-300">
@@ -212,36 +210,28 @@ export default function Collections() {
 
       {/* Product Grid */}
       <div 
-        className={`grid gap-x-4 transition-all duration-500 ease-out ${
-          zoomLevel === 1 
-            ? 'grid-cols-1' 
-            : 'gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8'
-        }`}
+        className={`${zoomLevel === 1 ? 'flex flex-col' : 'grid gap-x-4 gap-y-10 grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8'}`}
       >
         {filteredProducts.map((product) => (
           <Link
             key={product.id}
             to={`/products/${product.handle}`}
             prefetch="intent"
-            className={`group relative transition-all duration-500 ${
-              zoomLevel === 1 
-                ? 'snap-start h-[var(--product-viewport-height)] flex flex-col items-center justify-center w-full' 
-                : 'flex flex-col items-start justify-start'
-            }`}
+            className={`group relative ${zoomLevel === 1 ? 'snap-center h-[var(--product-viewport-height)] flex flex-col items-center justify-center w-full my-2' : 'flex flex-col items-start justify-start w-full'}`}
           >
             {/* Unified Card Content */}
-            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-2 pb-32' : 'gap-3'}`}>
-              <div className={`${zoomLevel === 1 ? 'w-full flex items-center justify-center' : 'w-full aspect-[4/5]'} overflow-hidden rounded-2xl`}>
+            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-3' : 'gap-3'}`}>
+              <div className={`${zoomLevel === 1 ? 'w-full flex items-center justify-center h-[80%]' : 'w-full aspect-[4/5]'} overflow-hidden rounded-2xl`}>
                 {product.featuredImage && (
                   <Image
                     data={product.featuredImage}
                     sizes="(min-width: 45em) 20vw, 50vw"
-                    className={`${zoomLevel === 1 ? 'max-h-[60vh] w-auto object-contain' : 'w-full h-full object-contain'} transition-transform duration-700 ease-out group-hover:scale-105`}
+                    className={`${zoomLevel === 1 ? 'max-h-[65vh] w-auto object-contain drop-shadow-xl' : 'w-full h-full object-contain'} transition-transform duration-500 ease-out group-hover:scale-105`}
                   />
                 )}
               </div>
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-primary text-sm font-medium tracking-wide group-hover:underline decoration-primary/30 underline-offset-4">
+              <div className="flex flex-col items-center gap-1 mt-2">
+                <span className="text-primary text-sm font-medium tracking-widest uppercase">
                   {product.title}
                 </span>
                 <span className="text-primary/60 text-xs tracking-wider">
