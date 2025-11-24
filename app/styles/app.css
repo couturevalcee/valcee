@@ -245,8 +245,7 @@ shop-pay-button {
   }
 
   .snap-y-mandatory {
-    scroll-snap-type: y mandatory;
-    scroll-behavior: smooth;
+    scroll-snap-type: y proximity;
     scroll-padding-top: var(--collections-header-height, 0px);
   }
 

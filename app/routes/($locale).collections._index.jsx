@@ -230,7 +230,7 @@ export default function Collections() {
             }`}
           >
             {/* Unified Card Content */}
-            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-2 pb-12' : 'gap-3'}`}>
+            <div className={`flex flex-col items-center justify-center w-full mx-auto ${zoomLevel === 1 ? 'max-w-[92vw] gap-2 pb-32' : 'gap-3'}`}>
               <div className={`${zoomLevel === 1 ? 'w-full flex items-center justify-center' : 'w-full aspect-[4/5]'} overflow-hidden rounded-2xl`}>
                 {product.featuredImage && (
                   <Image
