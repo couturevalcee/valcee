@@ -123,7 +123,7 @@ export default function ContactPage() {
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,260px)_1fr]">
         <div className="space-y-6">
-          <div className="rounded-xl border border-primary/15 bg-primary/5 px-5 py-4 space-y-2">
+          <div className="rounded-xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-6 py-5 space-y-2 shadow-sm">
             <Text
               as="p"
               className="text-xs uppercase tracking-[0.3em] text-primary/60"
@@ -140,7 +140,7 @@ export default function ContactPage() {
             </Text>
           </div>
 
-          <div className="rounded-xl border border-primary/15 px-5 py-4 space-y-3">
+          <div className="rounded-xl border border-primary/10 bg-contrast/95 backdrop-blur-sm px-6 py-5 space-y-3 shadow-sm">
             <div>
               <Text
                 as="p"
@@ -170,7 +170,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-primary/15 px-5 py-6 space-y-5 bg-contrast/80">
+        <div className="rounded-2xl border border-primary/10 bg-contrast/95 backdrop-blur-sm px-8 py-8 space-y-6 shadow-lg">
           <Form method="post" className="grid gap-4">
             <Input
               name="name"
@@ -194,12 +194,12 @@ export default function ContactPage() {
               name="message"
               placeholder="How can we help?"
               required
-              className="min-h-[160px] rounded-md bg-transparent border border-primary/30 px-4 py-3 focus:ring-2 focus:ring-primary/40 focus:outline-none"
+              className="min-h-[160px] rounded-xl bg-primary/[0.02] border border-primary/20 px-4 py-3 focus:ring-2 focus:ring-primary/30 focus:border-primary/40 focus:outline-none transition-all"
             />
             <button
               type="submit"
               disabled={isSubmitting}
-              className="tap uppercase tracking-[0.3em] text-xs sm:text-sm border border-primary px-6 py-3 w-full sm:w-auto sm:justify-self-start"
+              className="tap uppercase tracking-[0.3em] text-xs sm:text-sm border border-primary/30 hover:border-primary/50 rounded-lg px-8 py-3.5 w-full sm:w-auto sm:justify-self-start transition-all hover:bg-primary/5"
             >
               {isSubmitting ? 'Sending…' : 'Send'}
             </button>

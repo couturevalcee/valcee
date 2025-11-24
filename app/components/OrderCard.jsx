@@ -21,9 +21,9 @@ export function OrderCard({order}) {
     : `/account/orders/${legacyOrderId}`;
 
   return (
-    <li className="grid text-center border rounded">
+    <li className="grid text-center border border-primary/10 rounded-2xl overflow-hidden bg-contrast/90 backdrop-blur-sm shadow-sm">
       <Link
-        className="grid items-center gap-4 p-4 md:gap-6 md:p-6 md:grid-cols-2"
+        className="grid items-center gap-4 p-5 md:gap-6 md:p-6 md:grid-cols-2"
         to={url}
         prefetch="intent"
       >
@@ -87,7 +87,7 @@ export function OrderCard({order}) {
           </dl>
         </div>
       </Link>
-      <div className="flex border-t divide-x">
+      <div className="flex border-t border-primary/10 divide-x divide-primary/10">
         <Link
           className="flex-1 block p-2 text-center"
           to={url}

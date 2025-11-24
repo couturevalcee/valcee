@@ -34,7 +34,7 @@ export default function AccountLogin() {
       <PageHeader heading="Account access">
         <Text>Sign in to view orders, saved measurements, and tailored recommendations.</Text>
       </PageHeader>
-      <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-primary/15 bg-contrast px-6 py-8">
+      <div className="mx-auto mt-8 max-w-xl rounded-2xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-8 py-10 shadow-lg">
         <Form method="post" className="space-y-4">
           <Text>We use Shopify&apos;s secure customer portal for authentication.</Text>
           <Button

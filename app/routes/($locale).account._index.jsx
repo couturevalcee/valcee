@@ -29,7 +29,7 @@ function AccountSummary({orders}) {
   if (!orders?.length) {
     return (
       <section>
-        <div className="rounded-2xl border border-primary/15 bg-primary/5 px-6 py-5 space-y-2">
+        <div className="rounded-2xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-8 py-6 space-y-2 shadow-sm">
           <Heading size="lead">Create your Valcee archive</Heading>
           <Text>
             Once you place an order, your wardrobe value, delivery status, and tailor-made suggestions will live here.
@@ -69,7 +69,7 @@ function AccountSummary({orders}) {
 
 function SummaryCard({label, value}) {
   return (
-    <div className="rounded-2xl border border-primary/15 px-5 py-4 bg-contrast/80">
+    <div className="rounded-2xl border border-primary/10 px-6 py-5 bg-contrast/90 backdrop-blur-sm shadow-sm">
       <Text size="fine" className="uppercase tracking-[0.3em] text-primary/60">
         {label}
       </Text>
@@ -89,7 +89,7 @@ function ActiveOrders({orders}) {
 
   return (
     <section>
-      <div className="rounded-2xl border border-primary/15 px-5 py-5 space-y-4">
+      <div className="rounded-2xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-6 py-6 space-y-4 shadow-sm">
         <Heading size="lead">Active orders</Heading>
         <ul className="space-y-3">
           {openOrders.slice(0, 3).map((order) => {
@@ -99,7 +99,7 @@ function ActiveOrders({orders}) {
             return (
               <li
                 key={order.id}
-                className="flex flex-col gap-1 rounded-xl border border-primary/10 px-4 py-3 md:flex-row md:items-center md:justify-between"
+                className="flex flex-col gap-1 rounded-xl border border-primary/8 bg-primary/[0.02] px-4 py-3 md:flex-row md:items-center md:justify-between"
               >
                 <div>
                   <Text className="text-sm">Order No. {order.number}</Text>
@@ -152,7 +152,7 @@ function PurchaseHistory({orders}) {
         {purchases.map((item) => (
           <div
             key={`${item.title}-${item.date}`}
-            className="min-w-[160px] max-w-[200px] rounded-2xl border border-primary/15 bg-contrast/90"
+            className="min-w-[160px] max-w-[200px] rounded-2xl border border-primary/10 bg-contrast/95 backdrop-blur-sm shadow-sm"
           >
             {item.image?.url ? (
               <Image

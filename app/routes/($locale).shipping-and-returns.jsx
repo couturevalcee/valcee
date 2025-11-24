@@ -39,7 +39,7 @@ export default function ShippingAndReturns() {
         </Text>
       </header>
 
-      <article className="space-y-8 text-base leading-relaxed">
+      <article className="space-y-8 text-base leading-relaxed rounded-2xl border border-primary/10 bg-contrast/95 backdrop-blur-sm px-8 py-10 shadow-lg">
         <SectionBlock
           label="1"
           title="Fulfilment & timelines"

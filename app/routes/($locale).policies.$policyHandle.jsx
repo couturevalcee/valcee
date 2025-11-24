@@ -67,7 +67,7 @@ export default function Policies() {
         <div className="flex-grow w-full md:w-7/12">
           <div
             dangerouslySetInnerHTML={{__html: policy.body}}
-            className="prose dark:prose-invert"
+            className="prose dark:prose-invert rounded-2xl border border-primary/10 bg-contrast/90 backdrop-blur-sm px-8 py-8 shadow-sm"
           />
         </div>
       </Section>

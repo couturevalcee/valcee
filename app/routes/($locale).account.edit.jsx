@@ -98,7 +98,7 @@ export default function AccountDetailsEdit() {
       </Text>
       <Form method="post">
         {actionData?.formError && (
-          <div className="flex items-center justify-center mb-6 bg-red-100 rounded">
+          <div className="flex items-center justify-center mb-6 bg-red-100/80 backdrop-blur-sm rounded-xl border border-red-200">
             <p className="m-4 text-sm text-red-900">{actionData.formError}</p>
           </div>
         )}
