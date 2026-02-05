@@ -18,12 +18,12 @@ export const Button = forwardRef(
     const Component = props?.to ? Link : as;
 
     const baseButtonClasses =
-      'inline-block rounded font-medium text-center py-3 px-6';
+      'inline-block rounded font-medium text-center py-3 px-6 transition-all duration-300';
 
     const variants = {
-      primary: `${baseButtonClasses} bg-primary text-contrast`,
-      secondary: `${baseButtonClasses} border border-primary/10 bg-contrast text-primary`,
-      inline: 'border-b border-primary/10 leading-none pb-1',
+      primary: `${baseButtonClasses} bg-gradient-to-r from-accent to-accent/80 text-contrast hover:from-accent/90 hover:to-accent/70`,
+      secondary: `${baseButtonClasses} border border-primary/10 bg-contrast text-primary hover:bg-primary/5`,
+      inline: 'border-b border-primary/10 leading-none pb-1 transition-colors duration-300',
     };
 
     const widths = {

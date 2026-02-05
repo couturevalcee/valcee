@@ -14,10 +14,11 @@ export async function action({request, context}) {
     return json({error: 'Missing data'}, {status: 400});
   }
 
-  // 1. Get current wishlist
+  // 1. Get current wishlist and customer ID
   const {data} = await context.customerAccount.query(`#graphql
-    query getWishlist {
+    query getCustomerWishlist {
       customer {
+        id
         metafield(namespace: "custom", key: "wishlist") {
           value
         }
@@ -43,12 +44,18 @@ export async function action({request, context}) {
   }
 
   // 3. Save
+  const customerId = data?.customer?.id;
+  if (!customerId) {
+    return json({error: 'Customer not found'}, {status: 400});
+  }
+
   const {data: mutationData, errors} = await context.customerAccount.mutate(
     CUSTOMER_WISHLIST_UPDATE_MUTATION,
     {
       variables: {
         metafields: [
           {
+            ownerId: customerId,
             namespace: 'custom',
             key: 'wishlist',
             type: 'list.product_reference',
@@ -59,11 +66,11 @@ export async function action({request, context}) {
     },
   );
 
-  if (errors || mutationData?.customerUpdate?.userErrors?.length) {
+  if (errors || mutationData?.metafieldsSet?.userErrors?.length) {
     return json(
       {
         error: 'Failed to update',
-        details: mutationData?.customerUpdate?.userErrors,
+        details: mutationData?.metafieldsSet?.userErrors,
       },
       {status: 500},
     );

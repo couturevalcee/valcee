@@ -25,10 +25,11 @@ export async function action({request, context}) {
   // For now, we assume it's sent.
 
   // 2. Update History
-  // Get current history
+  // Get current history and customer ID
   const {data} = await context.customerAccount.query(`#graphql
-    query getHistory {
+    query getContactHistory {
       customer {
+        id
         metafield(namespace: "custom", key: "message_history") {
           value
         }
@@ -54,10 +55,16 @@ export async function action({request, context}) {
   history.unshift(newMessage); // Add to top
 
   // Save
-  const {errors} = await context.customerAccount.mutate(CUSTOMER_CONTACT_UPDATE_MUTATION, {
+  const customerId = data?.customer?.id;
+  if (!customerId) {
+    return json({error: 'Customer not found'}, {status: 400});
+  }
+
+  const {data: mutationData, errors} = await context.customerAccount.mutate(CUSTOMER_CONTACT_UPDATE_MUTATION, {
     variables: {
       metafields: [
         {
+          ownerId: customerId,
           namespace: 'custom',
           key: 'message_history',
           type: 'json',
@@ -67,7 +74,9 @@ export async function action({request, context}) {
     }
   });
 
-  if (errors) return json({error: 'Failed to save history'}, {status: 500});
+  if (errors || mutationData?.metafieldsSet?.userErrors?.length) {
+    return json({error: 'Failed to save history'}, {status: 500});
+  }
 
   return json({success: true});
 }

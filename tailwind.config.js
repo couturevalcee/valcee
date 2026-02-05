@@ -65,6 +65,9 @@ export default {
         darkHeader: 'inset 0px -1px 0px 0px rgba(21, 21, 21, 0.4)',
         lightHeader: 'inset 0px -1px 0px 0px rgba(21, 21, 21, 0.05)',
       },
+      backgroundImage: {
+        'painterly': 'linear-gradient(135deg, rgb(var(--color-accent)) 0%, rgb(var(--color-accent) / 0.8) 100%)',
+      },
     },
   },
   plugins: [formsPlugin, typographyPlugin],

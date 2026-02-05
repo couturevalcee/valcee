@@ -1,11 +1,11 @@
 export const CUSTOMER_WISHLIST_UPDATE_MUTATION = `#graphql
-  mutation updateWishlist($metafields: [MetafieldInput!]!) {
-    customerUpdate(input: {metafields: $metafields}) {
-      customer {
+  mutation updateWishlist($metafields: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $metafields) {
+      metafields {
         id
-        metafield(namespace: "custom", key: "wishlist") {
-          value
-        }
+        namespace
+        key
+        value
       }
       userErrors {
         field
