@@ -50,6 +50,49 @@ const FEATURED_PRODUCT_QUERY = `#graphql
   }
 `;
 
+const FALLBACK_PRODUCT_QUERY = `#graphql
+  query FallbackProduct(
+    $country: CountryCode
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    products(first: 1) {
+      edges {
+        node {
+          handle
+          title
+          description
+          featuredImage {
+            url
+            altText
+          }
+          media(first: 4) {
+            edges {
+              node {
+                __typename
+                ... on Video {
+                  previewImage {
+                    url
+                  }
+                  sources {
+                    url
+                    mimeType
+                  }
+                }
+              }
+            }
+          }
+          priceRange {
+            minVariantPrice {
+              amount
+              currencyCode
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 /**
  * @param {import('@shopify/remix-oxygen').LoaderFunctionArgs} args
  */
@@ -73,6 +116,21 @@ export async function loader(args) {
     });
     const edge = data?.products?.edges?.[0];
     featuredProduct = edge?.node || null;
+
+    // Fallback: if no featured product, get the first available product
+    if (!featuredProduct) {
+      const fallbackData = await context.storefront.query(
+        FALLBACK_PRODUCT_QUERY,
+        {
+          variables: {
+            country,
+            language,
+          },
+        },
+      );
+      const fallbackEdge = fallbackData?.products?.edges?.[0];
+      featuredProduct = fallbackEdge?.node || null;
+    }
   } catch (e) {
     console.error('Failed to load featured product for home', e);
   }
@@ -87,7 +145,8 @@ export async function loader(args) {
   });
 }
 
-export const meta = ({matches}) => getSeoMeta(...matches.map((m) => m.data.seo));
+export const meta = ({matches}) =>
+  getSeoMeta(...matches.map((m) => m.data.seo));
 
 export default function Homepage() {
   const {featuredProduct} = useLoaderData();
@@ -105,7 +164,7 @@ export default function Homepage() {
           />
         )}
         {/* Gradient veil so foreground floats */}
-        <div className="absolute inset-0 bg-gradient-to-b from-contrast/80 via-contrast/40 to-contrast/90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-contrast/80 via-contrast/50 to-contrast/90" />
       </div>
 
       {/* Full-page feature: centered text + actions, no box */}
@@ -142,7 +201,11 @@ export default function Homepage() {
         {/* Product name and actions */}
         <div className="flex flex-col items-center gap-4 flex-shrink-0">
           {featuredProduct?.title ? (
-            <Heading as="h2" size="lead" className="tracking-[0.1em] uppercase text-lg font-medium">
+            <Heading
+              as="h2"
+              size="lead"
+              className="tracking-[0.1em] uppercase text-lg font-medium"
+            >
               {featuredProduct.title}
             </Heading>
           ) : null}
@@ -153,7 +216,7 @@ export default function Homepage() {
               prefetch="intent"
               className="tap inline-flex items-center justify-center px-8 py-3 text-xs uppercase tracking-[0.2em] text-primary/80 hover:text-primary transition-colors border border-transparent hover:border-primary/10 rounded-full"
             >
-              Shop
+              Collections
             </Link>
           </div>
         </div>
@@ -161,4 +224,3 @@ export default function Homepage() {
     </main>
   );
 }
-

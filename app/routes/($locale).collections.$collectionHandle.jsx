@@ -60,20 +60,17 @@ export async function loader({params, request, context}) {
 
   let data;
   try {
-    data = await context.storefront.query(
-      COLLECTION_QUERY,
-      {
-        variables: {
-          ...paginationVariables,
-          handle: collectionHandle,
-          filters,
-          sortKey,
-          reverse,
-          country: context.storefront.i18n.country,
-          language: context.storefront.i18n.language,
-        },
+    data = await context.storefront.query(COLLECTION_QUERY, {
+      variables: {
+        ...paginationVariables,
+        handle: collectionHandle,
+        filters,
+        sortKey,
+        reverse,
+        country: context.storefront.i18n.country,
+        language: context.storefront.i18n.language,
       },
-    );
+    });
   } catch (e) {
     console.error('Failed to load collection', collectionHandle, e);
     data = {collection: null, collections: {nodes: [], pageInfo: {}}};
@@ -87,7 +84,12 @@ export async function loader({params, request, context}) {
       .replace(/-/g, ' ')
       .replace(/\b\w/g, (c) => c.toUpperCase());
 
-    const names = ['Safari Coat', 'Afroteq Suit', 'Item 318', 'Little Black Dress'];
+    const names = [
+      'Safari Coat',
+      'Afroteq Suit',
+      'Item 318',
+      'Little Black Dress',
+    ];
     const makeSlug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     const placeholderProducts = Array.from({length: 12}).map((_, i) => {
       const name = names[i % names.length];
@@ -320,7 +322,11 @@ function ProductsLoadedOnScroll({
   }, [inView, navigate, state, nextPageUrl, hasNextPage]);
 
   return (
-    <Grid layout="products" data-test="product-grid" className="[&_.card-image]:transition-transform [&_.card-image]:duration-200 [&_.card-image:hover]:scale-[1.03] md:pb-[20vh]">
+    <Grid
+      layout="products"
+      data-test="product-grid"
+      className="pb-[20vh] [&_.card-image]:transition-transform [&_.card-image]:duration-200 [&_.card-image:hover]:scale-[1.03]"
+    >
       {nodes.map((product, i) => (
         <ProductCard
           key={product.id}

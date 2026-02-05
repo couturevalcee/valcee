@@ -115,7 +115,7 @@ export const meta = ({matches}) => {
 export default function Product() {
   /** @type {LoaderReturnData} */
   const {product, shop, recommended, variants, storeDomain} = useLoaderData();
-  const {media, title, vendor, descriptionHtml} = product;
+  const {media, title, vendor, descriptionHtml, size} = product;
   const {shippingPolicy, refundPolicy} = shop;
 
   // Optimistically selects a variant with given available variant information
@@ -142,7 +142,7 @@ export default function Product() {
     if (videoRef.current) {
       videoRef.current.defaultMuted = true;
       videoRef.current.muted = true;
-      
+
       const playVideo = async () => {
         try {
           await videoRef.current.play();
@@ -152,7 +152,7 @@ export default function Product() {
           }
         }
       };
-      
+
       playVideo();
     }
   }, [firstVideo]);
@@ -173,7 +173,11 @@ export default function Product() {
             poster={firstVideo.previewImage?.url}
           >
             {firstVideo.sources.map((source) => (
-              <source key={source.url} src={source.url} type={source.mimeType} />
+              <source
+                key={source.url}
+                src={source.url}
+                type={source.mimeType}
+              />
             ))}
           </video>
         </div>
@@ -192,7 +196,10 @@ export default function Product() {
           {/* Right: details */}
           <div className="md:col-span-1 lg:col-span-1 flex flex-col gap-8 text-center items-center justify-center">
             <div className="flex flex-col gap-2 items-center">
-              <Heading as="h1" className="whitespace-normal text-4xl font-bold tracking-tighter">
+              <Heading
+                as="h1"
+                className="whitespace-normal text-4xl font-bold tracking-tighter"
+              >
                 {title}
               </Heading>
             </div>
@@ -202,6 +209,7 @@ export default function Product() {
               selectedVariant={selectedVariant}
               storeDomain={storeDomain}
               descriptionHtml={descriptionHtml}
+              size={size?.value}
             />
           </div>
         </div>
@@ -231,14 +239,22 @@ export default function Product() {
  *   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
  *   storeDomain: string;
  *   descriptionHtml: string;
+ *   size?: string;
  * }}
  */
-export function ProductForm({productOptions, selectedVariant, storeDomain, descriptionHtml}) {
+export function ProductForm({
+  productOptions,
+  selectedVariant,
+  storeDomain,
+  descriptionHtml,
+  size,
+}) {
   const isOutOfStock = !selectedVariant?.availableForSale;
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  
+
   // Check if we should hide options (single variant)
-  const hasVariants = productOptions.length > 1 || (productOptions[0]?.optionValues.length > 1);
+  const hasVariants =
+    productOptions.length > 1 || productOptions[0]?.optionValues.length > 1;
 
   return (
     <div className="grid gap-8 place-items-center">
@@ -248,17 +264,28 @@ export function ProductForm({productOptions, selectedVariant, storeDomain, descr
 
       {descriptionHtml && (
         <div className="flex flex-col items-center gap-2">
-          <button 
+          <button
             onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
             className="text-sm uppercase tracking-widest border-b border-primary/50 hover:border-primary transition-colors pb-0.5"
           >
             {isDescriptionExpanded ? 'Close' : 'Read More'}
           </button>
-          
-          <div 
-            className={`prose dark:prose-invert text-sm leading-relaxed opacity-80 overflow-hidden transition-all duration-500 ease-in-out ${isDescriptionExpanded ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
+
+          <div
+            className={`prose dark:prose-invert text-sm leading-relaxed opacity-80 overflow-hidden transition-all duration-500 ease-in-out ${
+              isDescriptionExpanded
+                ? 'max-h-[500px] opacity-100 mt-4'
+                : 'max-h-0 opacity-0'
+            }`}
           >
             <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
+            {size && (
+              <div className="mt-4 pt-4 border-t border-primary/20">
+                <p className="text-sm opacity-70">
+                  <strong>Size:</strong> {size}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -272,14 +299,16 @@ export function ProductForm({productOptions, selectedVariant, storeDomain, descr
                 {option.optionValues.map((value) => (
                   <Link
                     key={value.name}
-                    to={value.variantUriQuery ? `?${value.variantUriQuery}` : '#'}
+                    to={
+                      value.variantUriQuery ? `?${value.variantUriQuery}` : '#'
+                    }
                     preventScrollReset
                     replace
                     className={clsx(
                       'text-sm px-3 py-1 border transition-all',
-                      value.selected 
-                        ? 'border-primary opacity-100' 
-                        : 'border-transparent opacity-50 hover:opacity-100'
+                      value.selected
+                        ? 'border-primary opacity-100'
+                        : 'border-transparent opacity-50 hover:opacity-100',
                     )}
                   >
                     {value.name}
@@ -461,6 +490,9 @@ const PRODUCT_FRAGMENT = `#graphql
       nodes {
         ...Media
       }
+    }
+    size: metafield(namespace: "custom", key: "size") {
+      value
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}
