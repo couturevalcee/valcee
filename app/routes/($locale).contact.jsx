@@ -31,7 +31,7 @@ export async function action({request, context}) {
   }
 
   const {RESEND_API_KEY, CONTACT_FORWARD_EMAIL} = context.env;
-  const toEmail = CONTACT_FORWARD_EMAIL || 'relations@valcee.com';
+  const toEmail = CONTACT_FORWARD_EMAIL || 'couture@valcee.com';
 
   if (!RESEND_API_KEY) {
     console.warn(
@@ -46,7 +46,7 @@ export async function action({request, context}) {
   }
 
   const payload = {
-    from: 'Valcee Concierge <relations@valcee.com>',
+    from: 'Valcee Couture <couture@valcee.com>',
     to: [toEmail],
     reply_to: email,
     subject: `[Contact] ${topic || 'General inquiry'} from ${name}`,
@@ -110,7 +110,7 @@ export default function ContactPage() {
             href="mailto:relations@valcee.com"
             className="block text-lg font-medium tracking-tight hover:text-primary/70 transition-colors"
           >
-            relations@valcee.com
+            couture@valcee.com
           </a>
           <p className="text-xs text-primary/50 uppercase tracking-wider">
             Mon – Fri, 10 AM – 6 PM (PST)

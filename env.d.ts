@@ -29,6 +29,15 @@ declare global {
     PUBLIC_CUSTOMER_ACCOUNT_API_URL: string;
     PUBLIC_CHECKOUT_DOMAIN: string;
     SHOP_ID: string;
+    RESEND_API_KEY: string;
+    CONTACT_FORWARD_EMAIL: string;
+    KLAVIYO_PUBLIC_API_KEY: string;
+    KLAVIYO_PRIVATE_API_KEY: string;
+    KLAVIYO_LIST_ID: string;
+    PUBLIC_GA4_MEASUREMENT_ID: string;
+    PUBLIC_META_PIXEL_ID: string;
+    PUBLIC_WHATSAPP_NUMBER: string;
+    PUBLIC_INSTAGRAM_HANDLE: string;
   }
 }
 

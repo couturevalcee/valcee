@@ -168,17 +168,18 @@ export default function Homepage() {
       </div>
 
       {/* Full-page feature: centered text + actions, no box */}
-      <section className="relative flex-grow flex flex-col items-center justify-center px-4 py-0 text-center gap-6 fadeIn max-w-screen-xl mx-auto w-full h-full">
-        {/* Top label: FEATURED */}
-        <div className="space-y-3 max-w-xl flex-shrink-0">
+      <section className="relative flex-grow flex flex-col items-center justify-center px-4 py-0 text-center gap-5 fadeIn max-w-screen-xl mx-auto w-full h-full">
+        {/* Editorial label */}
+        <div className="flex flex-col items-center gap-1 flex-shrink-0">
           <Text
             size="fine"
-            className="uppercase tracking-[0.35em] text-primary/60 text-xs"
+            className="uppercase tracking-[0.4em] text-primary/40 text-[0.6rem]"
           >
             Featured
           </Text>
-          <div className="flex flex-col gap-1 text-primary/70 text-[0.65rem] tracking-[0.3em] uppercase font-medium">
+          <div className="flex items-center gap-3 text-primary/50 text-[0.6rem] tracking-[0.35em] uppercase font-light">
             <span>See value</span>
+            <span className="opacity-40">·</span>
             <span>Be value</span>
           </div>
         </div>
@@ -188,7 +189,7 @@ export default function Homepage() {
           <Link
             to={featuredProduct ? `/products/${featuredProduct.handle}` : '#'}
             prefetch={featuredProduct ? 'intent' : 'none'}
-            className="relative max-w-[65vw] md:max-w-sm w-full mx-auto tap flex-shrink transition-transform duration-500 hover:scale-105 flex items-center justify-center"
+            className="relative max-w-[70vw] sm:max-w-xs md:max-w-sm lg:max-w-md w-full mx-auto tap flex-shrink transition-transform duration-500 hover:scale-105 flex items-center justify-center"
           >
             <img
               src={imageMedia.url}
@@ -201,20 +202,36 @@ export default function Homepage() {
         {/* Product name and actions */}
         <div className="flex flex-col items-center gap-4 flex-shrink-0">
           {featuredProduct?.title ? (
-            <Heading
-              as="h2"
-              size="lead"
-              className="tracking-[0.1em] uppercase text-lg font-medium"
+            <Link
+              to={`/products/${featuredProduct.handle}`}
+              prefetch="intent"
+              className="group flex items-center gap-2"
             >
-              {featuredProduct.title}
-            </Heading>
+              <Heading
+                as="h2"
+                size="lead"
+                className="tracking-[0.12em] uppercase text-base font-medium group-hover:opacity-80 transition-opacity"
+              >
+                {featuredProduct.title}
+              </Heading>
+              <span className="text-primary/30 group-hover:text-primary/60 transition-colors text-sm">→</span>
+            </Link>
           ) : null}
 
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+            {featuredProduct && (
+              <Link
+                to={`/products/${featuredProduct.handle}`}
+                prefetch="intent"
+                className="tap inline-flex items-center justify-center px-8 py-3 text-xs uppercase tracking-[0.2em] text-contrast bg-primary hover:bg-primary/90 transition-colors rounded-full font-medium"
+              >
+                View Product
+              </Link>
+            )}
             <Link
               to="/collections"
               prefetch="intent"
-              className="tap inline-flex items-center justify-center px-8 py-3 text-xs uppercase tracking-[0.2em] text-primary/80 hover:text-primary transition-colors border border-transparent hover:border-primary/10 rounded-full"
+              className="tap inline-flex items-center justify-center px-8 py-3 text-xs uppercase tracking-[0.2em] text-primary/70 hover:text-primary transition-colors border border-primary/20 hover:border-primary/40 rounded-full"
             >
               Collections
             </Link>

@@ -18,6 +18,7 @@ import {
 import invariant from 'tiny-invariant';
 
 import {PageLayout} from '~/components/PageLayout';
+import {KlaviyoAnalytics} from '~/components/KlaviyoAnalytics';
 import {GenericError} from '~/components/GenericError';
 import {NotFound} from '~/components/NotFound';
 import {seoPayload} from '~/lib/seo.server';
@@ -127,6 +128,11 @@ async function loadCriticalData({request, context}) {
       withPrivacyBanner: true,
     },
     selectedLocale: storefront.i18n,
+    ga4MeasurementId: env.PUBLIC_GA4_MEASUREMENT_ID || null,
+    metaPixelId: env.PUBLIC_META_PIXEL_ID || null,
+    klaviyoPublicApiKey: env.KLAVIYO_PUBLIC_API_KEY || null,
+    whatsappNumber: env.PUBLIC_WHATSAPP_NUMBER || null,
+    instagramHandle: env.PUBLIC_INSTAGRAM_HANDLE || 'couturevalcee',
   };
 }
 
@@ -161,6 +167,8 @@ function Layout({children}) {
   /** @type {RootLoader} */
   const data = useRouteLoaderData('root');
   const locale = data?.selectedLocale ?? DEFAULT_LOCALE;
+  const ga4Id = data?.ga4MeasurementId;
+  const metaPixelId = data?.metaPixelId;
 
   return (
     <html lang={locale.language}>
@@ -171,6 +179,29 @@ function Layout({children}) {
         <link rel="stylesheet" href={styles} />
         <Meta />
         <Links />
+        {ga4Id && (
+          <>
+            <script
+              nonce={nonce}
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+            />
+            <script
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4Id}',{send_page_view:true});`,
+              }}
+            />
+          </>
+        )}
+        {metaPixelId && (
+          <script
+            nonce={nonce}
+            dangerouslySetInnerHTML={{
+              __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${metaPixelId}');fbq('track','PageView');`,
+            }}
+          />
+        )}
       </head>
       <body className="grain">
         {data ? (
@@ -184,15 +215,25 @@ function Layout({children}) {
               shop={data.shop}
               consent={data.consent}
             >
+              {data.klaviyoPublicApiKey && (
+                <KlaviyoAnalytics publicApiKey={data.klaviyoPublicApiKey} />
+              )}
               <PageLayout
                 key={`${locale.language}-${locale.country}`}
                 layout={data.layout}
+                whatsappNumber={data.whatsappNumber}
+                instagramHandle={data.instagramHandle}
               >
                 {children}
               </PageLayout>
             </Analytics.Provider>
           ) : (
-            <PageLayout key={`${locale.language}-${locale.country}`} layout={data.layout}>
+            <PageLayout
+              key={`${locale.language}-${locale.country}`}
+              layout={data.layout}
+              whatsappNumber={data.whatsappNumber}
+              instagramHandle={data.instagramHandle}
+            >
               {children}
             </PageLayout>
           )

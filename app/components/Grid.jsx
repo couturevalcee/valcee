@@ -24,13 +24,13 @@ export function Grid({
     default: `grid-cols-1 ${items === 2 && 'md:grid-cols-2'}  ${
       items === 3 && 'sm:grid-cols-3'
     } ${items > 3 && 'md:grid-cols-3'} ${items >= 4 && 'lg:grid-cols-4'}`,
-    products: `grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8`,
+    products: `grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6`,
     auto: 'auto-cols-auto',
     blog: 'grid-cols-1 md:grid-cols-2',
   };
 
   const gaps = {
-    default: 'grid gap-2 gap-y-6 md:gap-4 lg:gap-6',
+    default: 'grid gap-3 md:gap-4 lg:gap-6',
     blog: 'grid gap-6',
   };
 

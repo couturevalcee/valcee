@@ -35,7 +35,7 @@ export function ProductGallery({media, className}) {
 
       {/* Thumbnails */}
       {media.length > 1 && (
-        <div className="flex flex-wrap justify-center gap-3 w-full">
+        <div className="hiddenScroll flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory md:flex-wrap md:justify-center md:overflow-x-visible w-full">
           {media.map((med, i) => {
              const thumbImage = med.__typename === 'MediaImage' ? med.image : null;
              const isSelected = med.id === selectedMedia.id;
@@ -43,7 +43,7 @@ export function ProductGallery({media, className}) {
                <button
                  key={med.id || i}
                  onClick={() => setSelectedMedia(med)}
-                 className={`w-16 h-16 border transition-all duration-200 ${isSelected ? 'border-primary opacity-100' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                 className={`flex-shrink-0 snap-start w-14 h-14 md:w-16 md:h-16 border transition-all duration-200 ${isSelected ? 'border-primary opacity-100' : 'border-transparent opacity-50 hover:opacity-100'}`}
                >
                  {thumbImage && (
                    <Image

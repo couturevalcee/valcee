@@ -73,20 +73,20 @@ export function ProductCard({
               <Text
                 as="label"
                 size="fine"
-                className="absolute top-0 right-0 m-4 text-right text-notice"
+                className="absolute top-2 right-2 m-2 text-right text-notice"
               >
                 {cardLabel}
               </Text>
             </div>
             <div className="grid gap-0.5">
               <Text
-                className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
+                className="w-full overflow-hidden whitespace-nowrap text-ellipsis font-medium"
                 as="h3"
               >
                 {product.title}
               </Text>
-              <div className="flex gap-4">
-                <Text className="flex gap-4">
+              <div className="flex gap-4 items-baseline">
+                <Text className="flex gap-4 items-baseline">
                   <Money withoutTrailingZeros data={price} />
                   {isDiscounted(price, compareAtPrice) && (
                     <CompareAtPrice
@@ -129,20 +129,20 @@ export function ProductCard({
               <Text
                 as="label"
                 size="fine"
-                className="absolute top-0 right-0 m-4 text-right text-notice"
+                className="absolute top-2 right-2 m-2 text-right text-notice"
               >
                 {cardLabel}
               </Text>
             </div>
             <div className="grid gap-0.5">
               <Text
-                className="w-full overflow-hidden whitespace-nowrap text-ellipsis "
+                className="w-full overflow-hidden whitespace-nowrap text-ellipsis font-medium"
                 as="h3"
               >
                 {product.title}
               </Text>
-              <div className="flex gap-4">
-                <Text className="flex gap-4">
+              <div className="flex gap-4 items-baseline">
+                <Text className="flex gap-4 items-baseline">
                   <Money withoutTrailingZeros data={price} />
                   {isDiscounted(price, compareAtPrice) && (
                     <CompareAtPrice

@@ -20,6 +20,8 @@ import {
   IconClose,
   IconSearch,
 } from '~/components/Icon';
+import {Footer} from '~/components/Footer';
+import {NewsletterPopup} from '~/components/NewsletterPopup';
 import {useIsHomePath} from '~/lib/utils';
 import {useIsHydrated} from '~/hooks/useIsHydrated';
 import {useCartFetchers} from '~/hooks/useCartFetchers';
@@ -27,7 +29,7 @@ import {useCartFetchers} from '~/hooks/useCartFetchers';
 /**
  * @param {LayoutProps}
  */
-export function PageLayout({children, layout}) {
+export function PageLayout({children, layout, whatsappNumber, instagramHandle}) {
   const {headerMenu, footerMenu} = layout || {};
   const isHome = useIsHomePath();
   const location = useLocation();
@@ -64,19 +66,20 @@ export function PageLayout({children, layout}) {
             </div>
           </div>
         </main>
+        <Footer whatsappNumber={whatsappNumber} instagramHandle={instagramHandle} />
         {/* Bottom Controls */}
-        <BottomBar />
+        <BottomBar whatsappNumber={whatsappNumber} instagramHandle={instagramHandle} />
         
         {/* Bottom Gradient Mask to feather content before icons */}
-        <div className="fixed bottom-0 left-0 right-0 h-[15vh] bg-gradient-to-t from-contrast via-contrast/80 to-transparent z-40 pointer-events-none" />
+        <div className="fixed bottom-0 left-0 right-0 h-[15vh] bg-gradient-to-t from-contrast via-contrast/90 to-transparent z-40 pointer-events-none" />
         
         {/* Top Gradient Mask to feather header */}
-        <div className="fixed top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-contrast via-contrast/80 to-transparent z-30 pointer-events-none" />
+        <div className="fixed top-0 left-0 right-0 h-[15vh] bg-gradient-to-b from-contrast via-contrast/90 to-transparent z-30 pointer-events-none" />
         
         {/* Solid header background to hide scrolling content behind logo */}
         <div className="fixed top-0 left-0 right-0 h-[var(--height-nav)] bg-contrast z-20 pointer-events-none" />
       </div>
-      {/* Footer removed site-wide */}
+      <NewsletterPopup />
     </>
   );
 }
@@ -223,7 +226,6 @@ function MenuMobileNav({menu, onClose}) {
 
   const staticItems = [
     {id: 'collections', title: 'Collections', to: '/collections'},
-    {id: 'gallery', title: 'Gallery', to: '/gallery'},
     {id: 'account', title: 'Account', to: '/account'},
   ];
 
@@ -234,7 +236,7 @@ function MenuMobileNav({menu, onClose}) {
         {staticItems.map((item) => (
           <span key={item.id} className="block">
             <Link to={item.to} onClick={onClose}>
-              <span className="font-serif italic text-4xl md:text-5xl leading-none hover:opacity-70 transition-opacity">
+              <span className="font-serif italic text-4xl md:text-5xl leading-none tracking-tight hover:opacity-70 transition-opacity">
                 {item.title}
               </span>
             </Link>
@@ -244,17 +246,17 @@ function MenuMobileNav({menu, onClose}) {
 
       {/* Bottom Links */}
       <div className="flex flex-col items-center gap-4">
-        <Link to="/" onClick={onClose} className="text-sm uppercase tracking-widest hover:opacity-70">
+        <Link to="/" onClick={onClose} className="text-sm uppercase tracking-widest font-light opacity-60 hover:opacity-100 transition-opacity">
           Home
         </Link>
-        <Link to="/pages/contact" onClick={onClose} className="text-sm uppercase tracking-widest hover:opacity-70">
+        <Link to="/contact" onClick={onClose} className="text-sm uppercase tracking-widest font-light opacity-60 hover:opacity-100 transition-opacity">
           Contact
         </Link>
-        
+
         <Link
           to="/account/login"
           onClick={onClose}
-          className="text-sm uppercase tracking-widest hover:opacity-70 mt-4"
+          className="text-sm uppercase tracking-widest font-light opacity-60 hover:opacity-100 transition-opacity mt-4"
         >
           Log in
         </Link>
@@ -388,7 +390,7 @@ function Badge({openCart, dark, count}) {
 
 // Footer removed
 
-function BottomBar() {
+function BottomBar({whatsappNumber, instagramHandle}) {
   const rootData = useRouteLoaderData('root');
   if (!rootData) return null;
 
@@ -433,6 +435,12 @@ function BottomBar() {
     {to: '/terms-of-service', label: 'Terms of Service'},
     {to: '/shipping-and-returns', label: 'Shipping & Returns'},
     {to: '/policies/privacy-policy', label: 'Privacy Policy'},
+    ...(instagramHandle
+      ? [{href: `https://ig.me/m/${instagramHandle}`, label: 'Instagram DM', external: true}]
+      : []),
+    ...(whatsappNumber
+      ? [{href: `https://wa.me/${whatsappNumber}`, label: 'WhatsApp', external: true}]
+      : []),
   ];
 
   const searchResults = fetcher.data?.items || [];
@@ -488,21 +496,38 @@ function BottomBar() {
                     'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
                 }}
               >
-              {helpLinks.map((l, i) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  role="menuitem"
-                  className={`text-sm ${helpOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'}`}
-                  onClick={() => setHelpOpen(false)}
-                  style={{
-                    transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
-                    transitionDelay: helpOpen ? `${i * 60}ms` : '0ms',
-                  }}
-                >
-                  {l.label}
-                </Link>
-              ))}
+              {helpLinks.map((l, i) => {
+                const className = `text-sm font-medium ${helpOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[0.6vh]'}`;
+                const style = {
+                  transition: 'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
+                  transitionDelay: helpOpen ? `${i * 60}ms` : '0ms',
+                };
+                return l.external ? (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    role="menuitem"
+                    className={className}
+                    onClick={() => setHelpOpen(false)}
+                    style={style}
+                  >
+                    {l.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    role="menuitem"
+                    className={className}
+                    onClick={() => setHelpOpen(false)}
+                    style={style}
+                  >
+                    {l.label}
+                  </Link>
+                );
+              })}
               </div>
             </nav>
           </div>
@@ -549,7 +574,7 @@ function BottomBar() {
                   padding: '1.6vh 2.4vw',
                   transition:
                     'transform var(--dur-slower) var(--ease-spring), opacity var(--dur-slower) var(--ease-spring)',
-                  minWidth: '400px'
+                  minWidth: 'min(400px, 70vw)'
                 }}
               >
                 <form role="search" action="/search" method="get" className="flex items-center gap-3 w-full">

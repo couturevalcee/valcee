@@ -15,6 +15,7 @@ node_modules
 
 # Local env variants
 .env.local
+.env.secrets
 
 # Dev servers/build tools
 .vite/
