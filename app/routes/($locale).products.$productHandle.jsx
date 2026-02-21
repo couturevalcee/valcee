@@ -115,7 +115,20 @@ export const meta = ({matches}) => {
 export default function Product() {
   /** @type {LoaderReturnData} */
   const {product, shop, recommended, variants, storeDomain} = useLoaderData();
-  const {media, title, vendor, descriptionHtml, size} = product;
+  const {media, title, vendor, descriptionHtml, size, taxonomySize} = product;
+
+  // Resolve taxonomy size from metaobject references (e.g. ["gid://shopify/Metaobject/..."])
+  const taxonomySizeLabel = taxonomySize?.references?.nodes
+    ?.map((node) => {
+      const labelField = node.fields?.find(
+        (f) => f.key === 'label' || f.key === 'value' || f.key === 'name',
+      );
+      return labelField?.value ?? null;
+    })
+    .filter(Boolean)
+    .join(', ') || null;
+
+  const sizeValue = size?.value || taxonomySizeLabel || null;
   const {shippingPolicy, refundPolicy} = shop;
 
   // Optimistically selects a variant with given available variant information
@@ -209,7 +222,7 @@ export default function Product() {
               selectedVariant={selectedVariant}
               storeDomain={storeDomain}
               descriptionHtml={descriptionHtml}
-              size={size?.value}
+              size={sizeValue}
             />
           </div>
         </div>
@@ -279,13 +292,6 @@ export function ProductForm({
             }`}
           >
             <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-            {size && (
-              <div className="mt-4 pt-4 border-t border-primary/20">
-                <p className="text-sm opacity-70">
-                  <strong>Size:</strong> {size}
-                </p>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -317,6 +323,13 @@ export function ProductForm({
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {size && (
+        <div className="flex flex-col items-center gap-1 text-center">
+          <h3 className="text-xs uppercase tracking-widest opacity-50">Size</h3>
+          <p className="text-sm opacity-80">{size}</p>
         </div>
       )}
 
@@ -493,6 +506,20 @@ const PRODUCT_FRAGMENT = `#graphql
     }
     size: metafield(namespace: "custom", key: "size") {
       value
+    }
+    taxonomySize: metafield(namespace: "shopify", key: "size") {
+      value
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            id
+            fields {
+              key
+              value
+            }
+          }
+        }
+      }
     }
   }
   ${PRODUCT_VARIANT_FRAGMENT}

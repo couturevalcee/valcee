@@ -66,7 +66,7 @@ export function Drawer({heading, open, onClose, openFrom = 'right', children}) {
                     )}
                     <button
                       type="button"
-                      className="p-4 -m-4 transition text-primary hover:text-primary/50"
+                      className="p-4 -m-4 transition text-primary hover:text-primary/50 focus:outline-none"
                       onClick={onClose}
                       data-test="close-cart"
                     >

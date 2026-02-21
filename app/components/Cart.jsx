@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import {useRef} from 'react';
+import {useRef, useState} from 'react';
 import useScroll from 'react-use/esm/useScroll';
 import {
   flattenConnection,
@@ -153,7 +153,7 @@ function CartLines({layout = 'drawer', lines: cartLines}) {
     y > 0 ? 'border-t border-primary/10' : '',
     layout === 'page'
       ? 'flex-grow md:translate-y-4'
-      : 'px-6 pb-6 sm-max:pt-2 overflow-auto transition md:px-12',
+      : 'px-6 pt-6 pb-6 overflow-auto transition md:px-12',
   ]);
 
   return (
@@ -162,7 +162,7 @@ function CartLines({layout = 'drawer', lines: cartLines}) {
       aria-labelledby="cart-contents"
       className={className}
     >
-      <ul className="grid gap-8 md:gap-10">
+      <ul className="grid gap-4">
         {currentLines.map((line) => (
           <CartLineItem key={line.id} line={line} />
         ))}
@@ -175,13 +175,15 @@ function CartLines({layout = 'drawer', lines: cartLines}) {
  * @param {{checkoutUrl: string, cart?: any}}
  */
 function CartCheckoutActions({checkoutUrl, cart}) {
+  const [error, setError] = useState(null);
+
   // If checkoutUrl already present on cart, link directly to it
   if (checkoutUrl) {
     return (
       <div className="flex flex-col mt-2">
         <a href={checkoutUrl} target="_self">
           <Button as="span" width="full">
-            Continue
+            Proceed to Checkout
           </Button>
         </a>
       </div>
@@ -198,6 +200,7 @@ function CartCheckoutActions({checkoutUrl, cart}) {
 
   async function handleCreateCheckout(e) {
     e.preventDefault();
+    setError(null);
     try {
       const res = await fetch('/api/checkout/create', {
         method: 'POST',
@@ -209,30 +212,32 @@ function CartCheckoutActions({checkoutUrl, cart}) {
       const payload = await res.json();
       if (!res.ok) {
         console.error('Checkout create failed', payload);
-        // Basic error handling: open alert. Keep UX simple for now.
-        alert(payload.error || (payload.errors && payload.errors.map((e) => e.message).join(', ')) || 'Failed to create checkout');
+        setError(payload.error || (payload.errors && payload.errors.map((e) => e.message).join(', ')) || 'Failed to create checkout');
         return;
       }
       if (payload.url) {
         window.location.href = payload.url;
       } else {
-        alert('No checkout URL returned');
+        setError('No checkout URL returned');
       }
     } catch (err) {
       console.error('Error creating checkout', err);
-      alert('Error creating checkout');
+      setError('Something went wrong. Please try again.');
     }
   }
 
   if (!lines.length) return null;
 
   return (
-    <div className="flex flex-col mt-2">
-      <button onClick={handleCreateCheckout} className="button-primary">
+    <div className="flex flex-col mt-2 gap-2">
+      <button onClick={handleCreateCheckout} className="button-primary w-full">
         <Button as="span" width="full">
-          Continue
+          Proceed to Checkout
         </Button>
       </button>
+      {error && (
+        <p className="text-red-400 text-xs text-center mt-1">{error}</p>
+      )}
     </div>
   );
 }
@@ -246,7 +251,7 @@ function CartCheckoutActions({checkoutUrl, cart}) {
  */
 function CartSummary({cost, layout, children = null}) {
   const summary = {
-    drawer: 'grid gap-6 p-6 border-t border-primary/10 md:px-12 bg-primary/[0.02]',
+    drawer: 'grid gap-6 p-6 border-t border-primary/10 md:px-8 bg-primary/[0.02]',
     page: 'sticky top-nav grid gap-6 p-6 md:px-8 md:translate-y-4 bg-primary/5 rounded-xl border border-primary/10 w-full',
   };
 
@@ -287,56 +292,55 @@ function CartLineItem({line}) {
   return (
     <li
       key={id}
-      className="flex gap-4"
+      className="flex gap-5"
       style={{
-        // Hide the line item if the optimistic data action is remove
-        // Do not remove the form from the DOM
         display: optimisticData?.action === 'remove' ? 'none' : 'flex',
       }}
     >
-      <div className="flex-shrink">
-        {merchandise.image && (
+      {/* Image */}
+      {merchandise.image && (
+        <div className="flex-shrink-0">
           <Image
             width={110}
             data={merchandise.image}
             className="object-contain object-left w-24 h-auto rounded-xl md:w-28"
             alt={merchandise.title}
           />
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="flex justify-between flex-grow">
-        <div className="grid gap-2">
-          <Heading as="h3" size="copy">
+      {/* Content */}
+      <div className="flex flex-col flex-grow min-w-0 gap-1.5">
+        {/* Title + Price */}
+        <div className="flex items-start justify-between gap-2">
+          <Heading as="h3" size="copy" className="leading-snug truncate pr-2">
             {merchandise?.product?.handle ? (
-              <Link to={`/products/${merchandise.product.handle}`}>
+              <Link to={`/products/${merchandise.product.handle}`} className="hover:text-primary/70 transition-colors">
                 {merchandise?.product?.title || ''}
               </Link>
             ) : (
               <Text>{merchandise?.product?.title || ''}</Text>
             )}
           </Heading>
-
-          <div className="grid pb-2">
-            {(merchandise?.selectedOptions || [])
-              .filter((option) => option.value !== 'Default Title')
-              .map((option) => (
-                <Text color="subtle" key={option.name}>
-                  {option.name}: {option.value}
-                </Text>
-              ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex justify-start text-copy">
-              <CartLineQuantityAdjust line={line} />
-            </div>
-            <ItemRemoveButton lineId={id} />
-          </div>
+          <Text className="flex-shrink-0 text-sm font-medium">
+            <CartLinePrice line={line} as="span" />
+          </Text>
         </div>
-        <Text>
-          <CartLinePrice line={line} as="span" />
-        </Text>
+
+        {/* Variant options */}
+        {(merchandise?.selectedOptions || [])
+          .filter((option) => option.value !== 'Default Title')
+          .map((option) => (
+            <Text color="subtle" key={option.name} className="text-xs">
+              {option.name}: {option.value}
+            </Text>
+          ))}
+
+        {/* Controls */}
+        <div className="flex items-center gap-2 mt-1">
+          <CartLineQuantityAdjust line={line} />
+          <ItemRemoveButton lineId={id} />
+        </div>
       </div>
     </li>
   );
@@ -355,7 +359,7 @@ function ItemRemoveButton({lineId}) {
       }}
     >
       <button
-        className="flex items-center justify-center w-10 h-10 border border-primary/20 rounded-lg transition-colors hover:border-primary/40 hover:bg-primary/5"
+        className="flex items-center justify-center w-7 h-7 border border-primary/20 rounded-md transition-colors hover:border-primary/40 hover:bg-primary/5 focus:outline-none"
         type="submit"
       >
         <span className="sr-only">Remove</span>
@@ -386,12 +390,12 @@ function CartLineQuantityAdjust({line}) {
       <label htmlFor={`quantity-${lineId}`} className="sr-only">
         Quantity, {optimisticQuantity}
       </label>
-      <div className="flex items-center border border-primary/20 rounded-lg overflow-hidden">
+      <div className="flex items-center border border-primary/20 rounded-md overflow-hidden">
         <UpdateCartButton lines={[{id: lineId, quantity: prevQuantity}]}>
           <button
             name="decrease-quantity"
             aria-label="Decrease quantity"
-            className="w-10 h-10 transition text-primary/50 hover:text-primary hover:bg-primary/5 disabled:text-primary/10"
+            className="w-7 h-7 text-sm transition text-primary/50 hover:text-primary hover:bg-primary/5 disabled:text-primary/10 focus:outline-none"
             value={prevQuantity}
             disabled={optimisticQuantity <= 1}
           >
@@ -403,13 +407,13 @@ function CartLineQuantityAdjust({line}) {
           </button>
         </UpdateCartButton>
 
-        <div className="px-2 text-center" data-test="item-quantity">
+        <div className="px-2 text-xs text-center min-w-[1.5rem]" data-test="item-quantity">
           {optimisticQuantity}
         </div>
 
         <UpdateCartButton lines={[{id: lineId, quantity: nextQuantity}]}>
           <button
-            className="w-10 h-10 transition text-primary/50 hover:text-primary hover:bg-primary/5"
+            className="w-7 h-7 text-sm transition text-primary/50 hover:text-primary hover:bg-primary/5 focus:outline-none"
             name="increase-quantity"
             value={nextQuantity}
             aria-label="Increase quantity"
